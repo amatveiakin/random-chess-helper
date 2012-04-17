@@ -10,49 +10,36 @@
 
 #include <QDateTime>
 #include <QLayout>
-#include <QResizeEvent>
-#include <QtSvg/QSvgWidget>
+#include <QtSvg/QSvgRenderer>
+#include <QPainter>
 
 // TODO: Allow user to change it
 const bool forceDifferentBishops = true;
 const bool forceKingBetweenRooks = true;
 
-class PieceWidget : public QSvgWidget
-{
-public:
-  PieceWidget (const QString& file, int widgetSize, QWidget* parent)
-    : QSvgWidget (file, parent)
-  {
-    setMinimumSize (widgetSize, widgetSize);
-    setMaximumSize (widgetSize, widgetSize);
-  }
-};
-
 MainWindow::MainWindow (QWidget *parent)
   : QMainWindow (parent), ui (new Ui::MainWindow)
 {
+  srand (QDateTime::currentDateTime().toMSecsSinceEpoch ());
+
   ui->setupUi (this);
 
-  kingW    = 0;
-  queenW   = 0;
-  rook1W   = 0;
-  rook2W   = 0;
-  bishop1W = 0;
-  bishop2W = 0;
-  knight1W = 0;
-  knight2W = 0;
+  kingW   = new QSvgRenderer (QString::fromLatin1 ("../chess_pieces/Chess_klt45.svg"), this);
+  queenW  = new QSvgRenderer (QString::fromLatin1 ("../chess_pieces/Chess_qlt45.svg"), this);
+  rookW   = new QSvgRenderer (QString::fromLatin1 ("../chess_pieces/Chess_rlt45.svg"), this);
+  bishopW = new QSvgRenderer (QString::fromLatin1 ("../chess_pieces/Chess_blt45.svg"), this);
+  knightW = new QSvgRenderer (QString::fromLatin1 ("../chess_pieces/Chess_nlt45.svg"), this);
 
-  kingB    = 0;
-  queenB   = 0;
-  rook1B   = 0;
-  rook2B   = 0;
-  bishop1B = 0;
-  bishop2B = 0;
-  knight1B = 0;
-  knight2B = 0;
+  kingB   = new QSvgRenderer (QString::fromLatin1 ("../chess_pieces/Chess_kdt45.svg"), this);
+  queenB  = new QSvgRenderer (QString::fromLatin1 ("../chess_pieces/Chess_qdt45.svg"), this);
+  rookB   = new QSvgRenderer (QString::fromLatin1 ("../chess_pieces/Chess_rdt45.svg"), this);
+  bishopB = new QSvgRenderer (QString::fromLatin1 ("../chess_pieces/Chess_bdt45.svg"), this);
+  knightB = new QSvgRenderer (QString::fromLatin1 ("../chess_pieces/Chess_ndt45.svg"), this);
 
-  whiteLayout = 0;
-  blackLayout = 0;
+  whitePainter = new QPainter (ui->whitePiecesWidget);
+  blackPainter = new QPainter (ui->blackPiecesWidget);
+
+  connect (ui->generatePushButton, SIGNAL (clicked ()), SLOT (setupNewPlacing ()));
 }
 
 MainWindow::~MainWindow ()
@@ -101,8 +88,6 @@ void MainWindow::setOrientation (ScreenOrientation orientation)
 #endif // QT_VERSION < 0x040702
   };
   setAttribute(attribute, true);
-
-  ui->whitePiecesWidget->installEventFilter (this);
 }
 
 void MainWindow::showExpanded ()
@@ -116,123 +101,42 @@ void MainWindow::showExpanded ()
 #endif
 }
 
-bool MainWindow::eventFilter (QObject *qObj, QEvent *qEvent)
+QSvgRenderer* MainWindow::getWhitePieceRenderer (PieceType type)
 {
-  if (qObj == ui->whitePiecesWidget)
+  switch (type)
   {
-    if (qEvent->type () == QEvent::Resize)
-    {
-      if (!isInitialised)
-        // TODO: Fix strange layout underfull bug
-        initialize (static_cast <QResizeEvent*>(qEvent)->size ().width () / nPieces + 1);
-    }
-    return false;
+  case KING:
+    return kingW;
+  case QUEEN:
+    return queenW;
+  case ROOK:
+    return rookW;
+  case BISHOP:
+    return bishopW;
+  case KNIGHT:
+    return knightW;
+  case UNDEFINED:
+    abort ();
   }
-  else
-    return QMainWindow::eventFilter(qObj, qEvent);
 }
 
-void MainWindow::initialize (int pieceSize)
+QSvgRenderer* MainWindow::getBlackPieceRenderer (PieceType type)
 {
-  srand (QDateTime::currentDateTime().toMSecsSinceEpoch ());
-
-  whiteLayout = new QHBoxLayout;
-  blackLayout = new QHBoxLayout;
-
-  whiteLayout->setSpacing (0);
-  blackLayout->setSpacing (0);
-
-  kingW    = new PieceWidget ("../chess_pieces/Chess_klt45.svg", pieceSize, this);
-  queenW   = new PieceWidget ("../chess_pieces/Chess_qlt45.svg", pieceSize, this);
-  rook1W   = new PieceWidget ("../chess_pieces/Chess_rlt45.svg", pieceSize, this);
-  rook2W   = new PieceWidget ("../chess_pieces/Chess_rlt45.svg", pieceSize, this);
-  bishop1W = new PieceWidget ("../chess_pieces/Chess_blt45.svg", pieceSize, this);
-  bishop2W = new PieceWidget ("../chess_pieces/Chess_blt45.svg", pieceSize, this);
-  knight1W = new PieceWidget ("../chess_pieces/Chess_nlt45.svg", pieceSize, this);
-  knight2W = new PieceWidget ("../chess_pieces/Chess_nlt45.svg", pieceSize, this);
-
-  kingB    = new PieceWidget ("../chess_pieces/Chess_kdt45.svg", pieceSize, this);
-  queenB   = new PieceWidget ("../chess_pieces/Chess_qdt45.svg", pieceSize, this);
-  rook1B   = new PieceWidget ("../chess_pieces/Chess_rdt45.svg", pieceSize, this);
-  rook2B   = new PieceWidget ("../chess_pieces/Chess_rdt45.svg", pieceSize, this);
-  bishop1B = new PieceWidget ("../chess_pieces/Chess_bdt45.svg", pieceSize, this);
-  bishop2B = new PieceWidget ("../chess_pieces/Chess_bdt45.svg", pieceSize, this);
-  knight1B = new PieceWidget ("../chess_pieces/Chess_ndt45.svg", pieceSize, this);
-  knight2B = new PieceWidget ("../chess_pieces/Chess_ndt45.svg", pieceSize, this);
-
-  connect (ui->generatePushButton, SIGNAL (clicked ()), SLOT (setupNewPlacing ()));
-
-  ui->whitePiecesWidget->setLayout (whiteLayout);
-  ui->blackPiecesWidget->setLayout (blackLayout);
-}
-
-void MainWindow::clearLayouts ()
-{
-  whiteLayout->removeWidget (kingW);
-  whiteLayout->removeWidget (queenW);
-  whiteLayout->removeWidget (rook1W);
-  whiteLayout->removeWidget (rook2W);
-  whiteLayout->removeWidget (bishop1W);
-  whiteLayout->removeWidget (bishop2W);
-  whiteLayout->removeWidget (knight1W);
-  whiteLayout->removeWidget (knight2W);
-
-  blackLayout->removeWidget (kingB);
-  blackLayout->removeWidget (queenB);
-  blackLayout->removeWidget (rook1B);
-  blackLayout->removeWidget (rook2B);
-  blackLayout->removeWidget (bishop1B);
-  blackLayout->removeWidget (bishop2B);
-  blackLayout->removeWidget (knight1B);
-  blackLayout->removeWidget (knight2B);
-}
-
-void MainWindow::resetPieceCounters ()
-{
-  firstRook   = true;
-  firstBishop = true;
-  firstKnight = true;
-}
-
-PieceWidget* MainWindow::getPieceWidget (PieceColor color, PieceType type)
-{
-  if (color == WHITE)
+  switch (type)
   {
-    switch (type)
-    {
-    case KING:
-      return kingW;
-    case QUEEN:
-      return queenW;
-    case ROOK:
-      return firstRook   ? (firstRook = false,   rook1W  ) : rook2W;
-    case BISHOP:
-      return firstBishop ? (firstBishop = false, bishop1W) : bishop2W;
-    case KNIGHT:
-      return firstKnight ? (firstKnight = false, knight1W) : knight2W;
-    case UNDEFINED:
-      abort ();
-    }
+  case KING:
+    return kingB;
+  case QUEEN:
+    return queenB;
+  case ROOK:
+    return rookB;
+  case BISHOP:
+    return bishopB;
+  case KNIGHT:
+    return knightB;
+  case UNDEFINED:
+    abort ();
   }
-  else
-  {
-    switch (type)
-    {
-    case KING:
-      return kingB;
-    case QUEEN:
-      return queenB;
-    case ROOK:
-      return firstRook   ? (firstRook = false,   rook1B  ) : rook2B;
-    case BISHOP:
-      return firstBishop ? (firstBishop = false, bishop1B) : bishop2B;
-    case KNIGHT:
-      return firstKnight ? (firstKnight = false, knight1B) : knight2B;
-    case UNDEFINED:
-      abort ();
-    }
-  }
-  abort ();
 }
 
 static void addPieceAtPosition (PieceType* pieces, PieceType newPiece, int pos)
@@ -280,19 +184,14 @@ static void generatePlacing (PieceType* pieces)
   addPieceAtPosition (pieces, ROOK, 0);
 }
 
-// TODO: fix
 void MainWindow::setupNewPlacing ()
 {
   PieceType pieces[nPieces];
   generatePlacing (pieces);
 
-  clearLayouts ();
-
-  resetPieceCounters ();
+  int pieceSize = ui->whitePiecesWidget->width () / nPieces;
   for (int i = 0; i < nPieces; i++)
-    whiteLayout->addWidget (getPieceWidget (WHITE, pieces[i]));
-
-  resetPieceCounters ();
+    getWhitePieceRenderer (pieces[i])->render (whitePainter, QRect (i * pieceSize, 0, pieceSize, pieceSize));
   for (int i = 0; i < nPieces; i++)
-    blackLayout->addWidget (getPieceWidget (BLACK, pieces[i]));
+    getBlackPieceRenderer (pieces[i])->render (blackPainter, QRect (i * pieceSize, 0, pieceSize, pieceSize));
 }

@@ -9,8 +9,7 @@ namespace Ui {
 class MainWindow;
 }
 
-class PieceWidget;
-class QBoxLayout;
+class QSvgRenderer;
 
 enum PieceType
 {
@@ -20,12 +19,6 @@ enum PieceType
   ROOK,
   BISHOP,
   KNIGHT
-};
-
-enum PieceColor
-{
-  WHITE,
-  BLACK
 };
 
 class MainWindow : public QMainWindow
@@ -47,41 +40,27 @@ public:
   void showExpanded ();
 
 protected:
-  PieceWidget* kingW;
-  PieceWidget* queenW;
-  PieceWidget* rook1W;
-  PieceWidget* rook2W;
-  PieceWidget* bishop1W;
-  PieceWidget* bishop2W;
-  PieceWidget* knight1W;
-  PieceWidget* knight2W;
+  QSvgRenderer* kingW;
+  QSvgRenderer* queenW;
+  QSvgRenderer* rookW;
+  QSvgRenderer* bishopW;
+  QSvgRenderer* knightW;
 
-  PieceWidget* kingB;
-  PieceWidget* queenB;
-  PieceWidget* rook1B;
-  PieceWidget* rook2B;
-  PieceWidget* bishop1B;
-  PieceWidget* bishop2B;
-  PieceWidget* knight1B;
-  PieceWidget* knight2B;
+  QSvgRenderer* kingB;
+  QSvgRenderer* queenB;
+  QSvgRenderer* rookB;
+  QSvgRenderer* bishopB;
+  QSvgRenderer* knightB;
 
-  QBoxLayout* whiteLayout;
-  QBoxLayout* blackLayout;
-
-  bool firstRook;
-  bool firstBishop;
-  bool firstKnight;
-
-  bool eventFilter (QObject *qObj, QEvent *qEvent);
+  QPainter* whitePainter;
+  QPainter* blackPainter;
 
 private:
   Ui::MainWindow *ui;
   bool isInitialised;
 
-  void initialize (int pieceSize);
-  void clearLayouts ();
-  void resetPieceCounters ();
-  PieceWidget* getPieceWidget (PieceColor color, PieceType type);
+  QSvgRenderer* getWhitePieceRenderer (PieceType type);
+  QSvgRenderer* getBlackPieceRenderer (PieceType type);
 
 private slots:
   void setupNewPlacing ();
