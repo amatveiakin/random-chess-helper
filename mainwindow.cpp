@@ -17,38 +17,6 @@
 const bool forceDifferentBishops = true;
 const bool forceKingBetweenRooks = true;
 
-// TODO: Why doesn't it work?
-//class ChessPiece : public QSvgWidget
-//{
-//public:
-//  ChessPiece (const QString& file, QWidget* parent)
-//    : QSvgWidget (file, parent)
-//  {
-//    QSizePolicy newSizePolicy = sizePolicy ();
-//    newSizePolicy.setHeightForWidth (true);
-//    setSizePolicy (newSizePolicy);
-//  }
-//  int heightForWidth (int w) const { return w; }
-//};
-
-//class ChessPiece : public QSvgWidget
-//{
-//public:
-//  ChessPiece (const QString& file, int widgetSize, QWidget* parent)
-//    : QSvgWidget (file, parent)
-//  {
-//    setSizePolicy (QSizePolicy::Fixed, QSizePolicy::Fixed);
-//    m_widgetSize = widgetSize;
-//  }
-//  virtual QSize	sizeHint () const
-//  {
-//    return QSize (m_widgetSize, m_widgetSize);
-//  }
-//
-//private:
-//  int m_widgetSize;
-//};
-
 class PieceWidget : public QSvgWidget
 {
 public:
@@ -157,10 +125,7 @@ bool MainWindow::eventFilter (QObject *qObj, QEvent *qEvent)
       if (!isInitialised)
         // TODO: Fix strange layout underfull bug
         initialize (static_cast <QResizeEvent*>(qEvent)->size ().width () / nPieces + 1);
-//      return true;
     }
-//    else
-//      return false;
     return false;
   }
   else
@@ -176,22 +141,6 @@ void MainWindow::initialize (int pieceSize)
 
   whiteLayout->setSpacing (0);
   blackLayout->setSpacing (0);
-
-//  QFont *font = new QFont ("Times", 40);
-//  font->setStyleHint (QFont::System);
-////  setFont (*font);
-//  QLabel* testLabel = new QLabel;
-//  testLabel->setFont (*font);
-////  testLabel->setText (QString::fromUtf8 ("\320\227\320\264\321\200\320\260\320\262\321\201\321\202\320\262\321\203\320\271\321\202\320\265")); // ok
-////  testLabel->setText (QString::fromWCharArray (L"!\x0041!"));
-////  testLabel->setText (QString::fromWCharArray (L"!\x2654!"));
-////  testLabel->setText (QString::fromWCharArray (L"\u041f")); // ok
-////  testLabel->setText (QString::fromWCharArray (L"\u2654"));
-////  testLabel->setText (QString::fromUtf8 ("\357\273\277\342\231\224"));
-//  testLabel->setText (QString::fromUtf8 ("\357\273\277\320\271"));
-////  uint str32[] = { 0x0ae5, 0x0 };
-////  testLabel->setText (QString::fromUcs4 (str32));
-//  layout->addWidget (testLabel);
 
   kingW    = new PieceWidget ("../chess_pieces/Chess_klt45.svg", pieceSize, this);
   queenW   = new PieceWidget ("../chess_pieces/Chess_qlt45.svg", pieceSize, this);
@@ -331,22 +280,17 @@ static void generatePlacing (PieceType* pieces)
   addPieceAtPosition (pieces, ROOK, 0);
 }
 
+// TODO: fix
 void MainWindow::setupNewPlacing ()
 {
   PieceType pieces[nPieces];
   generatePlacing (pieces);
 
   clearLayouts ();
-//  ui->whitePiecesWidget->setLayout (0);
-//  delete whiteLayout;
-//  whiteLayout = new QHBoxLayout;
-//  whiteLayout->setSpacing (0);
 
   resetPieceCounters ();
-//  ui->whitePiecesWidget->setLayout (0);
   for (int i = 0; i < nPieces; i++)
     whiteLayout->addWidget (getPieceWidget (WHITE, pieces[i]));
-//  ui->whitePiecesWidget->setLayout (whiteLayout);
 
   resetPieceCounters ();
   for (int i = 0; i < nPieces; i++)
