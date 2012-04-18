@@ -109,6 +109,13 @@ void MainWindow::resizeEvent (QResizeEvent* qEvent)
   ui->forceKingBetweenRooksPushButton->      setMinimumHeight (qEvent->size ().height () / 6);
 }
 
+static QRect shrinkToSquare (const QRect& rect)
+{
+  int size = qMin (rect.width (), rect.height ());
+  QPoint center = rect.center ();
+  return QRect (center.x () - size / 2, center.y () - size / 2, size, size);
+}
+
 bool MainWindow::eventFilter (QObject* qObj, QEvent* qEvent)
 {
   if (qObj == ui->whitePiecesWidget)
@@ -118,9 +125,10 @@ bool MainWindow::eventFilter (QObject* qObj, QEvent* qEvent)
       if (pieces[0] == UNDEFINED)
         return true;
       QPainter whitePainter (ui->whitePiecesWidget);
-      int pieceSize = ui->whitePiecesWidget->width () / nPieces;
+      int pieceWidth  = ui->whitePiecesWidget->width () / nPieces;
+      int pieceHeight = ui->whitePiecesWidget->height ();
       for (int i = 0; i < nPieces; i++)
-        getWhitePieceRenderer (pieces[i])->render (&whitePainter, QRect (i * pieceSize, 0, pieceSize, pieceSize));
+        getWhitePieceRenderer (pieces[i])->render (&whitePainter, shrinkToSquare (QRect (i * pieceWidth, 0, pieceWidth, pieceHeight)));
       return true;
     }
     else
@@ -133,9 +141,10 @@ bool MainWindow::eventFilter (QObject* qObj, QEvent* qEvent)
       if (pieces[0] == UNDEFINED)
         return true;
       QPainter blackPainter (ui->blackPiecesWidget);
-      int pieceSize = ui->whitePiecesWidget->width () / nPieces;
+      int pieceWidth  = ui->blackPiecesWidget->width () / nPieces;
+      int pieceHeight = ui->blackPiecesWidget->height ();
       for (int i = 0; i < nPieces; i++)
-        getBlackPieceRenderer (pieces[i])->render (&blackPainter, QRect (i * pieceSize, 0, pieceSize, pieceSize));
+        getBlackPieceRenderer (pieces[i])->render (&blackPainter, shrinkToSquare (QRect (i * pieceWidth, 0, pieceWidth, pieceHeight)));
       return true;
     }
     else
