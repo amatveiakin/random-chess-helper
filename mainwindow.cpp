@@ -19,17 +19,17 @@ MainWindow::MainWindow (QWidget *parent)
   std::fill (whitePieces, whitePieces + nPieces, UNDEFINED);
   std::fill (blackPieces, blackPieces + nPieces, UNDEFINED);
 
-  kingW   = new QSvgRenderer (QString::fromLatin1 ("../chess_pieces/Chess_klt45.svg"), this);
-  queenW  = new QSvgRenderer (QString::fromLatin1 ("../chess_pieces/Chess_qlt45.svg"), this);
-  rookW   = new QSvgRenderer (QString::fromLatin1 ("../chess_pieces/Chess_rlt45.svg"), this);
-  bishopW = new QSvgRenderer (QString::fromLatin1 ("../chess_pieces/Chess_blt45.svg"), this);
-  knightW = new QSvgRenderer (QString::fromLatin1 ("../chess_pieces/Chess_nlt45.svg"), this);
+  kingW   = new QSvgRenderer (QString::fromLatin1 (":/pictures/pieces/white_king.svg"  ), this);
+  queenW  = new QSvgRenderer (QString::fromLatin1 (":/pictures/pieces/white_queen.svg" ), this);
+  rookW   = new QSvgRenderer (QString::fromLatin1 (":/pictures/pieces/white_rook.svg"  ), this);
+  bishopW = new QSvgRenderer (QString::fromLatin1 (":/pictures/pieces/white_bishop.svg"), this);
+  knightW = new QSvgRenderer (QString::fromLatin1 (":/pictures/pieces/white_knight.svg"), this);
 
-  kingB   = new QSvgRenderer (QString::fromLatin1 ("../chess_pieces/Chess_kdt45.svg"), this);
-  queenB  = new QSvgRenderer (QString::fromLatin1 ("../chess_pieces/Chess_qdt45.svg"), this);
-  rookB   = new QSvgRenderer (QString::fromLatin1 ("../chess_pieces/Chess_rdt45.svg"), this);
-  bishopB = new QSvgRenderer (QString::fromLatin1 ("../chess_pieces/Chess_bdt45.svg"), this);
-  knightB = new QSvgRenderer (QString::fromLatin1 ("../chess_pieces/Chess_ndt45.svg"), this);
+  kingB   = new QSvgRenderer (QString::fromLatin1 (":/pictures/pieces/black_king.svg"  ), this);
+  queenB  = new QSvgRenderer (QString::fromLatin1 (":/pictures/pieces/black_queen.svg" ), this);
+  rookB   = new QSvgRenderer (QString::fromLatin1 (":/pictures/pieces/black_rook.svg"  ), this);
+  bishopB = new QSvgRenderer (QString::fromLatin1 (":/pictures/pieces/black_bishop.svg"), this);
+  knightB = new QSvgRenderer (QString::fromLatin1 (":/pictures/pieces/black_knight.svg"), this);
 
   ui->whitePiecesWidget->installEventFilter (this);
   ui->blackPiecesWidget->installEventFilter (this);

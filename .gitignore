@@ -2,6 +2,7 @@ Makefile
 RandomChessHelper
 *.desktop
 *.pro.user
-moc_*.cpp
 *.o
+moc_*.cpp
+qrc_*.cpp
 ui_*.h
