@@ -15,11 +15,9 @@ MainWindow::MainWindow (QWidget *parent)
   srand (QDateTime::currentDateTime().toMSecsSinceEpoch ());
 
   ui->setupUi (this);
-  ui->buttonsLayout->setStretch (0, 1);
-  ui->buttonsLayout->setStretch (1, 2);
-  ui->buttonsLayout->setStretch (2, 1);
 
-  std::fill (pieces, pieces + nPieces, UNDEFINED);
+  std::fill (whitePieces, whitePieces + nPieces, UNDEFINED);
+  std::fill (blackPieces, blackPieces + nPieces, UNDEFINED);
 
   kingW   = new QSvgRenderer (QString::fromLatin1 ("../chess_pieces/Chess_klt45.svg"), this);
   queenW  = new QSvgRenderer (QString::fromLatin1 ("../chess_pieces/Chess_qlt45.svg"), this);
@@ -39,6 +37,7 @@ MainWindow::MainWindow (QWidget *parent)
   connect (ui->generatePushButton,                    SIGNAL (clicked ()),     SLOT (setupNewPlacing ()));
   connect (ui->forceOppositeColoredBishopsPushButton, SIGNAL (toggled (bool)), SLOT (updateSetings ()));
   connect (ui->forceKingBetweenRooksPushButton,       SIGNAL (toggled (bool)), SLOT (updateSetings ()));
+  connect (ui->forceSymmetricPlacingPushButton,       SIGNAL (toggled (bool)), SLOT (updateSetings ()));
 
   updateSetings ();
 }
@@ -104,9 +103,14 @@ void MainWindow::showExpanded ()
 
 void MainWindow::resizeEvent (QResizeEvent* qEvent)
 {
-  ui->generatePushButton->                   setMinimumHeight (qEvent->size ().height () / 4);
-  ui->forceOppositeColoredBishopsPushButton->setMinimumHeight (qEvent->size ().height () / 6);
-  ui->forceKingBetweenRooksPushButton->      setMinimumHeight (qEvent->size ().height () / 6);
+  const double buttonBarSize     = 1. / 3.;
+  const int    nSettingButtons   = 3;
+  const double settingButtonSize = buttonBarSize / nSettingButtons;
+
+  ui->generatePushButton->                   setMinimumHeight (qEvent->size ().height () * buttonBarSize    );
+  ui->forceOppositeColoredBishopsPushButton->setMinimumHeight (qEvent->size ().height () * settingButtonSize);
+  ui->forceKingBetweenRooksPushButton->      setMinimumHeight (qEvent->size ().height () * settingButtonSize);
+  ui->forceSymmetricPlacingPushButton->      setMinimumHeight (qEvent->size ().height () * settingButtonSize);
 }
 
 static QRect shrinkToSquare (const QRect& rect)
@@ -122,13 +126,13 @@ bool MainWindow::eventFilter (QObject* qObj, QEvent* qEvent)
   {
     if (qEvent->type () == QEvent::Paint)
     {
-      if (pieces[0] == UNDEFINED)
+      if (whitePieces[0] == UNDEFINED)
         return true;
       QPainter whitePainter (ui->whitePiecesWidget);
       int pieceWidth  = ui->whitePiecesWidget->width () / nPieces;
       int pieceHeight = ui->whitePiecesWidget->height ();
       for (int i = 0; i < nPieces; i++)
-        getWhitePieceRenderer (pieces[i])->render (&whitePainter, shrinkToSquare (QRect (i * pieceWidth, 0, pieceWidth, pieceHeight)));
+        getWhitePieceRenderer (whitePieces[i])->render (&whitePainter, shrinkToSquare (QRect (i * pieceWidth, 0, pieceWidth, pieceHeight)));
       return true;
     }
     else
@@ -138,13 +142,13 @@ bool MainWindow::eventFilter (QObject* qObj, QEvent* qEvent)
   {
     if (qEvent->type () == QEvent::Paint)
     {
-      if (pieces[0] == UNDEFINED)
+      if (blackPieces[0] == UNDEFINED)
         return true;
       QPainter blackPainter (ui->blackPiecesWidget);
       int pieceWidth  = ui->blackPiecesWidget->width () / nPieces;
       int pieceHeight = ui->blackPiecesWidget->height ();
       for (int i = 0; i < nPieces; i++)
-        getBlackPieceRenderer (pieces[i])->render (&blackPainter, shrinkToSquare (QRect (i * pieceWidth, 0, pieceWidth, pieceHeight)));
+        getBlackPieceRenderer (blackPieces[i])->render (&blackPainter, shrinkToSquare (QRect (i * pieceWidth, 0, pieceWidth, pieceHeight)));
       return true;
     }
     else
@@ -211,7 +215,7 @@ static void addPieceAtPosition (PieceType* pieces, PieceType newPiece, int pos)
   abort ();
 }
 
-void MainWindow::generatePlacing (PieceType* pieces)
+void MainWindow::generateOnePlayerPlacing (PieceType* pieces)
 {
   std::fill (pieces, pieces + nPieces, UNDEFINED);
 
@@ -239,9 +243,19 @@ void MainWindow::generatePlacing (PieceType* pieces)
   addPieceAtPosition (pieces, ROOK, 0);
 }
 
+void MainWindow::generatePlacing ()
+{
+  generateOnePlayerPlacing (whitePieces);
+
+  if (forceSymmetricPlacing)
+    std::copy (whitePieces, whitePieces + nPieces, blackPieces);
+  else
+    generateOnePlayerPlacing (blackPieces);
+}
+
 void MainWindow::setupNewPlacing ()
 {
-  generatePlacing (pieces);
+  generatePlacing ();
   ui->whitePiecesWidget->update ();
   ui->blackPiecesWidget->update ();
 }
@@ -249,5 +263,6 @@ void MainWindow::setupNewPlacing ()
 void MainWindow::updateSetings ()
 {
   forceOppositeColoredBishops = ui->forceOppositeColoredBishopsPushButton->isChecked ();
-  forceKingBetweenRooks       = ui->forceKingBetweenRooksPushButton->isChecked ();
+  forceKingBetweenRooks       = ui->forceKingBetweenRooksPushButton->      isChecked ();
+  forceSymmetricPlacing       = ui->forceSymmetricPlacingPushButton->      isChecked ();
 }

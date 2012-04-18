@@ -40,9 +40,11 @@ public:
   void showExpanded ();
 
 protected:
-  PieceType pieces[nPieces];
+  PieceType whitePieces[nPieces];
+  PieceType blackPieces[nPieces];
   bool forceOppositeColoredBishops;
   bool forceKingBetweenRooks;
+  bool forceSymmetricPlacing;
 
   QSvgRenderer* kingW;
   QSvgRenderer* queenW;
@@ -58,7 +60,9 @@ protected:
 
   void resizeEvent (QResizeEvent* qEvent);
   bool eventFilter (QObject* qObj, QEvent* qEvent);
-  void generatePlacing (PieceType* pieces);
+
+  void generateOnePlayerPlacing (PieceType* pieces);
+  void generatePlacing ();
 
 private:
   Ui::MainWindow* ui;
