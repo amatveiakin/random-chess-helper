@@ -40,6 +40,10 @@ public:
   void showExpanded ();
 
 protected:
+  PieceType pieces[nPieces];
+  bool forceOppositeColoredBishops;
+  bool forceKingBetweenRooks;
+
   QSvgRenderer* kingW;
   QSvgRenderer* queenW;
   QSvgRenderer* rookW;
@@ -52,11 +56,12 @@ protected:
   QSvgRenderer* bishopB;
   QSvgRenderer* knightB;
 
-  QPainter* whitePainter;
-  QPainter* blackPainter;
+  void resizeEvent (QResizeEvent* qEvent);
+  bool eventFilter (QObject* qObj, QEvent* qEvent);
+  void generatePlacing (PieceType* pieces);
 
 private:
-  Ui::MainWindow *ui;
+  Ui::MainWindow* ui;
   bool isInitialised;
 
   QSvgRenderer* getWhitePieceRenderer (PieceType type);
@@ -64,6 +69,7 @@ private:
 
 private slots:
   void setupNewPlacing ();
+  void updateSetings ();
 };
 
 #endif // MAINWINDOW_H

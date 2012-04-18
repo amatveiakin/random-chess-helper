@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Random chess helper</string>
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QVBoxLayout" name="verticalLayout">
@@ -19,11 +19,37 @@
      <widget class="QWidget" name="whitePiecesWidget" native="true"/>
     </item>
     <item>
-     <layout class="QHBoxLayout" name="horizontalLayout">
+     <layout class="QHBoxLayout" name="buttonsLayout">
+      <item>
+       <widget class="QPushButton" name="forceOppositeColoredBishopsPushButton">
+        <property name="text">
+         <string>Opposite-colored Bishops</string>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
       <item>
        <widget class="QPushButton" name="generatePushButton">
         <property name="text">
-         <string>PushButton</string>
+         <string>Generate!</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="forceKingBetweenRooksPushButton">
+        <property name="text">
+         <string>King between Rooks</string>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
         </property>
        </widget>
       </item>
