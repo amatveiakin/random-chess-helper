@@ -9,6 +9,9 @@
 #include <QResizeEvent>
 #include <QtSvg/QSvgRenderer>
 
+const QColor whiteBackcolor = 0xd18b47;
+const QColor blackBackcolor = 0xffce9e;
+
 MainWindow::MainWindow (QWidget *parent)
   : QMainWindow (parent), ui (new Ui::MainWindow)
 {
@@ -132,7 +135,11 @@ bool MainWindow::eventFilter (QObject* qObj, QEvent* qEvent)
       int pieceWidth  = ui->whitePiecesWidget->width () / nPieces;
       int pieceHeight = ui->whitePiecesWidget->height ();
       for (int i = 0; i < nPieces; i++)
-        getWhitePieceRenderer (whitePieces[i])->render (&whitePainter, shrinkToSquare (QRect (i * pieceWidth, 0, pieceWidth, pieceHeight)));
+      {
+        QRect cellRect = QRect (i * pieceWidth, 0, pieceWidth, pieceHeight);
+        whitePainter.fillRect (cellRect, i % 2 == 0 ? whiteBackcolor : blackBackcolor);
+        getWhitePieceRenderer (whitePieces[i])->render (&whitePainter, shrinkToSquare (cellRect));
+      }
       return true;
     }
     else
@@ -148,7 +155,12 @@ bool MainWindow::eventFilter (QObject* qObj, QEvent* qEvent)
       int pieceWidth  = ui->blackPiecesWidget->width () / nPieces;
       int pieceHeight = ui->blackPiecesWidget->height ();
       for (int i = 0; i < nPieces; i++)
-        getBlackPieceRenderer (blackPieces[i])->render (&blackPainter, shrinkToSquare (QRect (i * pieceWidth, 0, pieceWidth, pieceHeight)));
+        for (int i = 0; i < nPieces; i++)
+        {
+          QRect cellRect = QRect (i * pieceWidth, 0, pieceWidth, pieceHeight);
+          blackPainter.fillRect (cellRect, i % 2 == 0 ? blackBackcolor : whiteBackcolor);
+          getBlackPieceRenderer (blackPieces[i])->render (&blackPainter, shrinkToSquare (cellRect));
+        }
       return true;
     }
     else
