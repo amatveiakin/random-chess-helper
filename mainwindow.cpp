@@ -1,3 +1,16 @@
+// TODO: Rotate black pieces 180 degrees
+
+// TODO: Pre-render svg pictures to raster images (for speed-up)
+
+// TODO: Scale the button-bar so that the cells are not stretched vertically,
+//       at least when setting buttons are small.
+//       Note. Use ``heightMM ()'', not ``height ()''!
+
+// TOOD: Make the setting buttons role more obvious: they are not looking like
+//       toggle buttons on my Nokia 5800
+
+// TODO: Save settings
+
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
