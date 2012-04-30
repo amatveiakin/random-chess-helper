@@ -1,10 +1,3 @@
-// TODO: Scale the button-bar so that the cells are not stretched vertically,
-//       at least when setting buttons are small.
-//       Note. Use ``heightMM ()'', not ``height ()''!
-
-// TOOD: Make the setting buttons role more obvious: they are not looking like
-//       toggle buttons on my Nokia 5800
-
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
@@ -16,6 +9,8 @@
 #include <QResizeEvent>
 #include <QSettings>
 #include <QtSvg/QSvgRenderer>
+
+#include "optionsform.h"
 
 
 const QString companyName     = "Andrei's Soft";
@@ -50,16 +45,19 @@ MainWindow::MainWindow (QWidget *parent)
   blackRenderers [BISHOP] = new QSvgRenderer (QString::fromLatin1 (":/pictures/pieces/black_bishop.svg"), this);
   blackRenderers [KNIGHT] = new QSvgRenderer (QString::fromLatin1 (":/pictures/pieces/black_knight.svg"), this);
 
-  appSetting = new QSettings (companyName, applicationName);
-  loadSettings ();
+  ui->buttonsLayout->setStretch (0, 1);
+  ui->buttonsLayout->setStretch (1, 2);
+  ui->buttonsLayout->setStretch (2, 1);
+
+  optionsForm = 0;
+  appSettings = new QSettings (companyName, applicationName);
 
   ui->whitePiecesWidget->installEventFilter (this);
   ui->blackPiecesWidget->installEventFilter (this);
 
-  connect (ui->generatePushButton,                    SIGNAL (clicked ()),     SLOT (setupNewPlacing ()));
-  connect (ui->forceOppositeColoredBishopsPushButton, SIGNAL (toggled (bool)), SLOT (saveSettings ()));
-  connect (ui->forceKingBetweenRooksPushButton,       SIGNAL (toggled (bool)), SLOT (saveSettings ()));
-  connect (ui->forceSymmetricPlacingPushButton,       SIGNAL (toggled (bool)), SLOT (saveSettings ()));
+  connect (ui->generatePushButton, SIGNAL (clicked ()), SLOT (setupNewPlacing ()));
+  connect (ui->optionsPushButton,  SIGNAL (clicked ()), SLOT (showOptions ()));
+  connect (ui->quitPushButton,     SIGNAL (clicked ()), SLOT (close ()));
 }
 
 MainWindow::~MainWindow ()
@@ -71,7 +69,8 @@ MainWindow::~MainWindow ()
     delete whiteImages[i];
     delete blackImages[i];
   }
-  delete appSetting;
+  delete optionsForm;
+  delete appSettings;
 }
 
 void MainWindow::setOrientation (ScreenOrientation orientation)
@@ -130,14 +129,12 @@ void MainWindow::showExpanded ()
 
 void MainWindow::resizeEvent (QResizeEvent* qEvent)
 {
-  const double buttonBarSize     = 1. / 3.;
-  const int    nSettingButtons   = 3;
-  const double settingButtonSize = buttonBarSize / nSettingButtons;
+  const double generateButtionHeight = 1. / 3.;
+  const double otherButtionsHeight   = 1. / 4.;
 
-  ui->generatePushButton->                   setMinimumHeight (qEvent->size ().height () * buttonBarSize    );
-  ui->forceOppositeColoredBishopsPushButton->setMinimumHeight (qEvent->size ().height () * settingButtonSize);
-  ui->forceKingBetweenRooksPushButton->      setMinimumHeight (qEvent->size ().height () * settingButtonSize);
-  ui->forceSymmetricPlacingPushButton->      setMinimumHeight (qEvent->size ().height () * settingButtonSize);
+  ui->generatePushButton->setMinimumHeight (qEvent->size ().height () * generateButtionHeight);
+  ui->optionsPushButton-> setMinimumHeight (qEvent->size ().height () * otherButtionsHeight);
+  ui->quitPushButton->    setMinimumHeight (qEvent->size ().height () * otherButtionsHeight);
 }
 
 static QRect shrinkToSquare (const QRect& rect)
@@ -222,7 +219,7 @@ void MainWindow::generateOnePlayerPlacing (PieceType* pieces)
 {
   std::fill (pieces, pieces + nPieces, UNDEFINED);
 
-  if (appSetting->value ("forceOppositeColoredBishops").toBool ())
+  if (appSettings->value ("forceOppositeColoredBishops").toBool ())
   {
     pieces [(rand () % 4) * 2]     = BISHOP;
     pieces [(rand () % 4) * 2 + 1] = BISHOP;
@@ -237,7 +234,7 @@ void MainWindow::generateOnePlayerPlacing (PieceType* pieces)
   addPieceAtPosition (pieces, KNIGHT, rand () % 5);
   addPieceAtPosition (pieces, KNIGHT, rand () % 4);
 
-  if (appSetting->value ("forceKingBetweenRooks").toBool ())
+  if (appSettings->value ("forceKingBetweenRooks").toBool ())
     addPieceAtPosition (pieces, KING, 1);
   else
     addPieceAtPosition (pieces, KING, rand () % 3);
@@ -250,7 +247,7 @@ void MainWindow::generatePlacing ()
 {
   generateOnePlayerPlacing (whitePieces);
 
-  if (appSetting->value ("forceSymmetricPlacing").toBool ())
+  if (appSettings->value ("forceSymmetricPlacing").toBool ())
     std::copy (whitePieces, whitePieces + nPieces, blackPieces);
   else
     generateOnePlayerPlacing (blackPieces);
@@ -263,16 +260,9 @@ void MainWindow::setupNewPlacing ()
   ui->blackPiecesWidget->update ();
 }
 
-void MainWindow::saveSettings ()
+void MainWindow::showOptions ()
 {
-  appSetting->setValue ("forceOppositeColoredBishops",  ui->forceOppositeColoredBishopsPushButton->isChecked ());
-  appSetting->setValue ("forceKingBetweenRooks",        ui->forceKingBetweenRooksPushButton->      isChecked ());
-  appSetting->setValue ("forceSymmetricPlacing",        ui->forceSymmetricPlacingPushButton->      isChecked ());
-}
-
-void MainWindow::loadSettings ()
-{
-  ui->forceOppositeColoredBishopsPushButton->setChecked (appSetting->value ("forceOppositeColoredBishops", false).toBool ());
-  ui->forceKingBetweenRooksPushButton      ->setChecked (appSetting->value ("forceKingBetweenRooks",       false).toBool ());
-  ui->forceSymmetricPlacingPushButton      ->setChecked (appSetting->value ("forceSymmetricPlacing",       false).toBool ());
+  if (!optionsForm)
+    optionsForm = new OptionsForm (appSettings);
+  optionsForm->show ();
 }

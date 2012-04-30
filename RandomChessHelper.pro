@@ -23,9 +23,12 @@ symbian:TARGET.UID3 = 0xE3F4466D
 # MOBILITY +=
 
 QT += svg
-SOURCES += main.cpp mainwindow.cpp
-HEADERS += mainwindow.h
-FORMS += mainwindow.ui
+SOURCES += main.cpp mainwindow.cpp \
+    optionsform.cpp
+HEADERS += mainwindow.h \
+    optionsform.h
+FORMS += mainwindow.ui \
+    optionsform.ui
 
 # Please do not modify the following two lines. Required for deployment.
 include(deployment.pri)

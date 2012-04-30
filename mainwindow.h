@@ -12,6 +12,8 @@ class MainWindow;
 class QSvgRenderer;
 class QSettings;
 
+class OptionsForm;
+
 enum PieceType
 {
   KING,
@@ -52,7 +54,7 @@ protected:
   QImage* whiteImages [nPieceTypes];
   QImage* blackImages [nPieceTypes];
 
-  QSettings* appSetting;
+  QSettings* appSettings;
 
   void resizeEvent (QResizeEvent* qEvent);
   bool eventFilter (QObject* qObj, QEvent* qEvent);
@@ -62,12 +64,12 @@ protected:
 
 private:
   Ui::MainWindow* ui;
+  OptionsForm* optionsForm;
   bool isInitialised;
 
 private slots:
   void setupNewPlacing ();
-  void saveSettings ();
-  void loadSettings ();
+  void showOptions ();
 };
 
 #endif // MAINWINDOW_H

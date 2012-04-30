@@ -21,47 +21,11 @@
     <item>
      <layout class="QHBoxLayout" name="buttonsLayout">
       <item>
-       <layout class="QVBoxLayout" name="verticalLayout_2">
-        <item>
-         <widget class="QPushButton" name="forceOppositeColoredBishopsPushButton">
-          <property name="text">
-           <string>Opposite-colored Bishops</string>
-          </property>
-          <property name="checkable">
-           <bool>true</bool>
-          </property>
-          <property name="checked">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="forceKingBetweenRooksPushButton">
-          <property name="text">
-           <string>King between Rooks</string>
-          </property>
-          <property name="checkable">
-           <bool>true</bool>
-          </property>
-          <property name="checked">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="forceSymmetricPlacingPushButton">
-          <property name="text">
-           <string>Symmetric Placing</string>
-          </property>
-          <property name="checkable">
-           <bool>true</bool>
-          </property>
-          <property name="checked">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-       </layout>
+       <widget class="QPushButton" name="optionsPushButton">
+        <property name="text">
+         <string>Options...</string>
+        </property>
+       </widget>
       </item>
       <item>
        <widget class="QPushButton" name="generatePushButton">
@@ -70,12 +34,17 @@
         </property>
        </widget>
       </item>
+      <item>
+       <widget class="QPushButton" name="quitPushButton">
+        <property name="text">
+         <string>Quit</string>
+        </property>
+       </widget>
+      </item>
      </layout>
     </item>
     <item>
-     <widget class="QWidget" name="whitePiecesWidget" native="true">
-      <zorder>blackPiecesWidget</zorder>
-     </widget>
+     <widget class="QWidget" name="whitePiecesWidget" native="true"/>
     </item>
    </layout>
   </widget>
