@@ -13,13 +13,15 @@ class QSvgRenderer;
 
 enum PieceType
 {
-  UNDEFINED,
   KING,
   QUEEN,
   ROOK,
   BISHOP,
-  KNIGHT
+  KNIGHT,
+  UNDEFINED
 };
+
+const int nPieceTypes = UNDEFINED;
 
 class MainWindow : public QMainWindow
 {
@@ -46,17 +48,11 @@ protected:
   bool forceKingBetweenRooks;
   bool forceSymmetricPlacing;
 
-  QSvgRenderer* kingW;
-  QSvgRenderer* queenW;
-  QSvgRenderer* rookW;
-  QSvgRenderer* bishopW;
-  QSvgRenderer* knightW;
+  QSvgRenderer* whiteRenderers [nPieceTypes];
+  QSvgRenderer* blackRenderers [nPieceTypes];
 
-  QSvgRenderer* kingB;
-  QSvgRenderer* queenB;
-  QSvgRenderer* rookB;
-  QSvgRenderer* bishopB;
-  QSvgRenderer* knightB;
+  QImage* whiteImages [nPieceTypes];
+  QImage* blackImages [nPieceTypes];
 
   void resizeEvent (QResizeEvent* qEvent);
   bool eventFilter (QObject* qObj, QEvent* qEvent);
@@ -67,9 +63,6 @@ protected:
 private:
   Ui::MainWindow* ui;
   bool isInitialised;
-
-  QSvgRenderer* getWhitePieceRenderer (PieceType type);
-  QSvgRenderer* getBlackPieceRenderer (PieceType type);
 
 private slots:
   void setupNewPlacing ();

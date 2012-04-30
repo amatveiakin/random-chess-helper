@@ -1,7 +1,3 @@
-// TODO: Rotate black pieces 180 degrees
-
-// TODO: Pre-render svg pictures to raster images (for speed-up)
-
 // TODO: Scale the button-bar so that the cells are not stretched vertically,
 //       at least when setting buttons are small.
 //       Note. Use ``heightMM ()'', not ``height ()''!
@@ -35,17 +31,20 @@ MainWindow::MainWindow (QWidget *parent)
   std::fill (whitePieces, whitePieces + nPieces, UNDEFINED);
   std::fill (blackPieces, blackPieces + nPieces, UNDEFINED);
 
-  kingW   = new QSvgRenderer (QString::fromLatin1 (":/pictures/pieces/white_king.svg"  ), this);
-  queenW  = new QSvgRenderer (QString::fromLatin1 (":/pictures/pieces/white_queen.svg" ), this);
-  rookW   = new QSvgRenderer (QString::fromLatin1 (":/pictures/pieces/white_rook.svg"  ), this);
-  bishopW = new QSvgRenderer (QString::fromLatin1 (":/pictures/pieces/white_bishop.svg"), this);
-  knightW = new QSvgRenderer (QString::fromLatin1 (":/pictures/pieces/white_knight.svg"), this);
+  std::fill (whiteImages, whiteImages + nPieceTypes, (QImage*) 0);
+  std::fill (blackImages, blackImages + nPieceTypes, (QImage*) 0);
 
-  kingB   = new QSvgRenderer (QString::fromLatin1 (":/pictures/pieces/black_king.svg"  ), this);
-  queenB  = new QSvgRenderer (QString::fromLatin1 (":/pictures/pieces/black_queen.svg" ), this);
-  rookB   = new QSvgRenderer (QString::fromLatin1 (":/pictures/pieces/black_rook.svg"  ), this);
-  bishopB = new QSvgRenderer (QString::fromLatin1 (":/pictures/pieces/black_bishop.svg"), this);
-  knightB = new QSvgRenderer (QString::fromLatin1 (":/pictures/pieces/black_knight.svg"), this);
+  whiteRenderers [KING  ] = new QSvgRenderer (QString::fromLatin1 (":/pictures/pieces/white_king.svg"  ), this);
+  whiteRenderers [QUEEN ] = new QSvgRenderer (QString::fromLatin1 (":/pictures/pieces/white_queen.svg" ), this);
+  whiteRenderers [ROOK  ] = new QSvgRenderer (QString::fromLatin1 (":/pictures/pieces/white_rook.svg"  ), this);
+  whiteRenderers [BISHOP] = new QSvgRenderer (QString::fromLatin1 (":/pictures/pieces/white_bishop.svg"), this);
+  whiteRenderers [KNIGHT] = new QSvgRenderer (QString::fromLatin1 (":/pictures/pieces/white_knight.svg"), this);
+
+  blackRenderers [KING  ] = new QSvgRenderer (QString::fromLatin1 (":/pictures/pieces/black_king.svg"  ), this);
+  blackRenderers [QUEEN ] = new QSvgRenderer (QString::fromLatin1 (":/pictures/pieces/black_queen.svg" ), this);
+  blackRenderers [ROOK  ] = new QSvgRenderer (QString::fromLatin1 (":/pictures/pieces/black_rook.svg"  ), this);
+  blackRenderers [BISHOP] = new QSvgRenderer (QString::fromLatin1 (":/pictures/pieces/black_bishop.svg"), this);
+  blackRenderers [KNIGHT] = new QSvgRenderer (QString::fromLatin1 (":/pictures/pieces/black_knight.svg"), this);
 
   ui->whitePiecesWidget->installEventFilter (this);
   ui->blackPiecesWidget->installEventFilter (this);
@@ -136,23 +135,41 @@ static QRect shrinkToSquare (const QRect& rect)
   return QRect (center.x () - size / 2, center.y () - size / 2, size, size);
 }
 
+static void renderImages (PieceType* pieces, QWidget* targetWidget, QSvgRenderer** renderers, QImage** images, bool rotatedPieces, bool invertedCells)
+{
+  if (pieces[0] == UNDEFINED)
+    return;
+
+  int pieceWidth  = targetWidget->width () / nPieces;
+  int pieceHeight = targetWidget->height ();
+
+  if (!images[0] || images[0]->size () != QSize (pieceWidth, pieceHeight)) {
+    for (int i = 0; i < nPieceTypes; i++) {
+      QImage curImage (pieceWidth, pieceHeight, QImage::Format_ARGB32_Premultiplied);
+      QPainter curPainter (&curImage);
+      curImage.fill (Qt::transparent);
+      renderers[i]->render (&curPainter, shrinkToSquare (QRect (0, 0, pieceWidth, pieceHeight)));
+      delete images[i];
+      images[i] = new QImage (curImage.mirrored (rotatedPieces, rotatedPieces));
+    }
+  }
+
+  QPainter boardPainter (targetWidget);
+  for (int i = 0; i < nPieces; i++)
+  {
+    QRect cellRect = QRect (i * pieceWidth, 0, pieceWidth, pieceHeight);
+    boardPainter.fillRect (cellRect, (i % 2) ^ invertedCells ? blackBackcolor : whiteBackcolor);
+    boardPainter.drawImage (i * pieceWidth, 0, *images [pieces[i]]);
+  }
+}
+
 bool MainWindow::eventFilter (QObject* qObj, QEvent* qEvent)
 {
   if (qObj == ui->whitePiecesWidget)
   {
     if (qEvent->type () == QEvent::Paint)
     {
-      if (whitePieces[0] == UNDEFINED)
-        return true;
-      QPainter whitePainter (ui->whitePiecesWidget);
-      int pieceWidth  = ui->whitePiecesWidget->width () / nPieces;
-      int pieceHeight = ui->whitePiecesWidget->height ();
-      for (int i = 0; i < nPieces; i++)
-      {
-        QRect cellRect = QRect (i * pieceWidth, 0, pieceWidth, pieceHeight);
-        whitePainter.fillRect (cellRect, i % 2 == 0 ? whiteBackcolor : blackBackcolor);
-        getWhitePieceRenderer (whitePieces[i])->render (&whitePainter, shrinkToSquare (cellRect));
-      }
+      renderImages (whitePieces, ui->whitePiecesWidget, whiteRenderers, whiteImages, false, false);
       return true;
     }
     else
@@ -162,18 +179,7 @@ bool MainWindow::eventFilter (QObject* qObj, QEvent* qEvent)
   {
     if (qEvent->type () == QEvent::Paint)
     {
-      if (blackPieces[0] == UNDEFINED)
-        return true;
-      QPainter blackPainter (ui->blackPiecesWidget);
-      int pieceWidth  = ui->blackPiecesWidget->width () / nPieces;
-      int pieceHeight = ui->blackPiecesWidget->height ();
-      for (int i = 0; i < nPieces; i++)
-        for (int i = 0; i < nPieces; i++)
-        {
-          QRect cellRect = QRect (i * pieceWidth, 0, pieceWidth, pieceHeight);
-          blackPainter.fillRect (cellRect, i % 2 == 0 ? blackBackcolor : whiteBackcolor);
-          getBlackPieceRenderer (blackPieces[i])->render (&blackPainter, shrinkToSquare (cellRect));
-        }
+      renderImages (blackPieces, ui->blackPiecesWidget, blackRenderers, blackImages, true, true);
       return true;
     }
     else
@@ -181,46 +187,6 @@ bool MainWindow::eventFilter (QObject* qObj, QEvent* qEvent)
   }
   else
     return QMainWindow::eventFilter(qObj, qEvent);
-}
-
-QSvgRenderer* MainWindow::getWhitePieceRenderer (PieceType type)
-{
-  switch (type)
-  {
-    case KING:
-      return kingW;
-    case QUEEN:
-      return queenW;
-    case ROOK:
-      return rookW;
-    case BISHOP:
-      return bishopW;
-    case KNIGHT:
-      return knightW;
-    case UNDEFINED:
-      abort ();
-  }
-  abort ();
-}
-
-QSvgRenderer* MainWindow::getBlackPieceRenderer (PieceType type)
-{
-  switch (type)
-  {
-    case KING:
-      return kingB;
-    case QUEEN:
-      return queenB;
-    case ROOK:
-      return rookB;
-    case BISHOP:
-      return bishopB;
-    case KNIGHT:
-      return knightB;
-    case UNDEFINED:
-      abort ();
-  }
-  abort ();
 }
 
 static void addPieceAtPosition (PieceType* pieces, PieceType newPiece, int pos)
