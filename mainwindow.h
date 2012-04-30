@@ -11,6 +11,7 @@ class MainWindow;
 
 class QSvgRenderer;
 class QSettings;
+class QStackedLayout;
 
 class OptionsForm;
 
@@ -75,12 +76,16 @@ protected:
 
 private:
   Ui::MainWindow* ui;
+  QStackedLayout* mainLayout;
   OptionsForm* optionsForm;
   bool isInitialised;
 
+public slots:
+  void showOptions ();
+  void hideOptions ();
+
 private slots:
   void setupNewPlacing ();
-  void showOptions ();
 };
 
 #endif // MAINWINDOW_H

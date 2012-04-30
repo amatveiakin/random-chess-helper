@@ -8,6 +8,8 @@
 #include <QPainter>
 #include <QResizeEvent>
 #include <QSettings>
+#include <QStackedLayout>
+#include <QBoxLayout>
 #include <QtSvg/QSvgRenderer>
 
 #include "optionsform.h"
@@ -26,6 +28,10 @@ MainWindow::MainWindow (QWidget *parent)
   srand (QDateTime::currentDateTime().toMSecsSinceEpoch ());
 
   ui->setupUi (this);
+
+  mainLayout = new QStackedLayout;
+  mainLayout->addWidget (ui->formWidget);
+  ui->centralWidget->setLayout (mainLayout);
 
   clearPosition ();
 
@@ -358,7 +364,14 @@ void MainWindow::setupNewPlacing ()
 
 void MainWindow::showOptions ()
 {
-  if (!optionsForm)
+  if (!optionsForm) {
     optionsForm = new OptionsForm (appSettings, this);
-  optionsForm->show ();
+    mainLayout->addWidget (optionsForm);
+  }
+  mainLayout->setCurrentWidget (optionsForm);
+}
+
+void MainWindow::hideOptions ()
+{
+  mainLayout->setCurrentWidget (ui->formWidget);
 }

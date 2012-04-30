@@ -1,6 +1,8 @@
 #include "optionsform.h"
 #include "ui_optionsform.h"
 
+#include <QCloseEvent>
+#include <QPushButton>
 #include <QSettings>
 
 #include "mainwindow.h"
@@ -14,10 +16,21 @@ OptionsForm::OptionsForm (QSettings* appSettings_, MainWindow* mainWindow_, QWid
   appSettings = appSettings_;
   mainWindow  = mainWindow_;
 
+  const int minHeight = height () / 6;
+
+  QPushButton* okButton = ui->buttonBox->button (QDialogButtonBox::Ok);
+  if (okButton)
+    okButton->setMinimumSize (width () / 2, minHeight);
+
+  ui->oppositeColoredBishopsCheckBox->setMinimumHeight (minHeight);
+  ui->kingBetweenRooksCheckBox      ->setMinimumHeight (minHeight);
+  ui->symmetricPlacingCheckBox      ->setMinimumHeight (minHeight);
+  ui->bughouseModeCheckBox          ->setMinimumHeight (minHeight);
+
   ui->oppositeColoredBishopsCheckBox->setChecked (appSettings->value ("oppositeColoredBishops", true).toBool ());
   ui->kingBetweenRooksCheckBox      ->setChecked (appSettings->value ("kingBetweenRooks",       true).toBool ());
   ui->symmetricPlacingCheckBox      ->setChecked (appSettings->value ("symmetricPlacing",       true).toBool ());
-  ui->bughouseModeCheckBox          ->setChecked (appSettings->value ("bughouseMode",               false).toBool ());
+  ui->bughouseModeCheckBox          ->setChecked (appSettings->value ("bughouseMode",          false).toBool ());
 
   connect (ui->oppositeColoredBishopsCheckBox, SIGNAL (toggled (bool)), SLOT (applySettings ()));
   connect (ui->kingBetweenRooksCheckBox,       SIGNAL (toggled (bool)), SLOT (applySettings ()));
@@ -39,4 +52,10 @@ void OptionsForm::applySettings ()
   appSettings->setValue ("symmetricPlacing",        ui->symmetricPlacingCheckBox->      isChecked ());
   appSettings->setValue ("bughouseMode",            ui->bughouseModeCheckBox->          isChecked ());
   mainWindow->applySettings ();
+}
+
+void OptionsForm::closeEvent (QCloseEvent *event)
+{
+  mainWindow->hideOptions ();
+  event->accept();
 }

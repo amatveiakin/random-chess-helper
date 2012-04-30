@@ -7,6 +7,7 @@ namespace Ui {
 class OptionsForm;
 }
 
+class QCloseEvent;
 class QSettings;
 
 class MainWindow;
@@ -22,6 +23,8 @@ public:
 protected:
   QSettings* appSettings;
   MainWindow* mainWindow;
+
+  void closeEvent (QCloseEvent *event);
 
 private:
   Ui::OptionsForm *ui;
