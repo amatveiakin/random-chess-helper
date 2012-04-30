@@ -1,0 +1,7 @@
+Makefile
+RandomChessHelper
+*.desktop
+*.pro.user
+moc_*.cpp
+*.o
+ui_*.h
