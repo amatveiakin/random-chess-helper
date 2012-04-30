@@ -138,8 +138,8 @@ void MainWindow::updateLayout (QSize size)
   double otherButtionsHeightCoeff;
 
   if (appSettings->value ("bughouseMode").toBool ()) {
-    generateButtionHeightCoeff = 1. / 4.;
-    otherButtionsHeightCoeff   = 1. / 5.;
+    generateButtionHeightCoeff = 1. / 5.;
+    otherButtionsHeightCoeff   = 1. / 6.;
   }
   else {
     generateButtionHeightCoeff = 1. / 3.;
@@ -177,7 +177,7 @@ static void updateImages (QSvgRenderer** renderers, QImage** images, QSize newSi
   }
 }
 
-static void renderOneSide (PieceType* pieces, QPainter* targetPainter, QRect targetRect, QSvgRenderer** renderers, QImage** images, bool rotatedPieces, bool invertedCells)
+static void renderOneSide (PieceType* pieces, QPainter* targetPainter, QRect targetRect, QSvgRenderer** renderers, QImage** images, bool rotatedPieces, bool invertedCells, bool invertOrder)
 {
   if (pieces[0] == UNDEFINED)
     return;
@@ -190,11 +190,12 @@ static void renderOneSide (PieceType* pieces, QPainter* targetPainter, QRect tar
   {
     QRect cellRect = QRect (QPoint (i * pieceSize.width (), 0) + targetRect.topLeft (), pieceSize);
     targetPainter->fillRect (cellRect, (i % 2) ^ invertedCells ? blackBackcolor : whiteBackcolor);
-    targetPainter->drawImage (cellRect.topLeft (), images [pieces[i]]->mirrored (rotatedPieces, rotatedPieces));
+    PieceType piece = pieces [invertOrder ? (nPieces - i - 1) : i];
+    targetPainter->drawImage (cellRect.topLeft (), images [piece]->mirrored (rotatedPieces, rotatedPieces));
   }
 
   targetPainter->setPen (Qt::black);
-  targetPainter->drawRect (targetRect.adjusted (0, 0, -1, -1));
+  targetPainter->drawRect (QRect (targetRect.topLeft (), QSize (pieceSize.width () * nPieces - 1, pieceSize.height () - 1)));
 }
 
 PieceType* MainWindow::getPieces (bool white)
@@ -217,6 +218,32 @@ QWidget* MainWindow::getDrawWidget (bool white)
   return white ? ui->whitePiecesWidget : ui->blackPiecesWidget;
 }
 
+static bool makeVerticalLayout (QSize size, QRect& box1, QRect& box2)
+{
+  const double maxWidthCoeff = 0.8;
+  const double minWidthCoeff = 0.55;
+
+  int height = size.height () / 2;
+  int width = qMin (height * 8, (int) (size.width () * maxWidthCoeff));
+
+  if (width < size.width () * minWidthCoeff)
+    return false;
+
+  box1 = QRect (0,                   0,        width, height);
+  box2 = QRect (size.width () - width, height, width, height);
+
+  return true;
+}
+
+static void makeHorizontalLayout (QSize size, QRect& box1, QRect& box2)
+{
+  int height = size.height ();
+  int width = size.width () / 2;
+
+  box1 = QRect (0,     0, width, height);
+  box2 = QRect (width, 0, width, height);
+}
+
 // TODO: make rectangles change layout to horizontal when it's appropriate
 void MainWindow::repaintWidget (bool white)
 {
@@ -224,15 +251,15 @@ void MainWindow::repaintWidget (bool white)
   QPainter targetPainter (targetWidget);
 
   if (appSettings->value ("bughouseMode").toBool ()) {
-    int height = targetWidget->height () / 2;
-    int widgetWidth = targetWidget->width ();
-    int width = qBound (widgetWidth * 0.6, height * 8.0, widgetWidth * 0.8);
+    QRect board1, board2;
+    if (!makeVerticalLayout (targetWidget->size (), board1, board2))
+      makeHorizontalLayout (targetWidget->size (), board1, board2);
 
-    renderOneSide (getPieces (white),  &targetPainter, QRect (0,                   0,      width, height), getRenderers (white),  getImages (white),  !white, !white);
-    renderOneSide (getPieces (!white), &targetPainter, QRect (widgetWidth - width, height, width, height), getRenderers (!white), getImages (!white), !white,  white);
+    renderOneSide (getPieces (white),  &targetPainter, board1, getRenderers (white),  getImages (white),  !white, !white, false);
+    renderOneSide (getPieces (!white), &targetPainter, board2, getRenderers (!white), getImages (!white), !white, !white, true );
   }
   else
-    renderOneSide (getPieces (white), &targetPainter, QRect (QPoint (), targetWidget->size ()), getRenderers (white), getImages (white), !white, !white);
+    renderOneSide (getPieces (white), &targetPainter, QRect (QPoint (), targetWidget->size ()), getRenderers (white), getImages (white), !white, !white, false);
 }
 
 bool MainWindow::eventFilter (QObject* qObj, QEvent* qEvent)
