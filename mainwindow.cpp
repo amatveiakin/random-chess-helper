@@ -144,32 +144,75 @@ static QRect shrinkToSquare (const QRect& rect)
   return QRect (center.x () - size / 2, center.y () - size / 2, size, size);
 }
 
-static void renderImages (PieceType* pieces, QWidget* targetWidget, QSvgRenderer** renderers, QImage** images, bool rotatedPieces, bool invertedCells)
+// TODO: make images square
+static void updateImages (QSvgRenderer** renderers, QImage** images, QSize newSize)
+{
+  if (!images[0] || images[0]->size () != newSize) {
+    for (int i = 0; i < nPieceTypes; i++) {
+      delete images[i];
+      images[i] = new QImage (newSize.width (), newSize.height (), QImage::Format_ARGB32_Premultiplied);
+      QPainter curPainter (images[i]);
+      images[i]->fill (Qt::transparent);
+      renderers[i]->render (&curPainter, shrinkToSquare (QRect (0, 0, newSize.width (), newSize.height ())));
+    }
+  }
+}
+
+static void renderOneSide (PieceType* pieces, QPainter* targetPainter, QRect targetRect, QSvgRenderer** renderers, QImage** images, bool rotatedPieces, bool invertedCells)
 {
   if (pieces[0] == UNDEFINED)
     return;
 
-  int pieceWidth  = targetWidget->width () / nPieces;
-  int pieceHeight = targetWidget->height ();
+  QSize pieceSize (targetRect.width () / nPieces, targetRect.height ());
 
-  if (!images[0] || images[0]->size () != QSize (pieceWidth, pieceHeight)) {
-    for (int i = 0; i < nPieceTypes; i++) {
-      QImage curImage (pieceWidth, pieceHeight, QImage::Format_ARGB32_Premultiplied);
-      QPainter curPainter (&curImage);
-      curImage.fill (Qt::transparent);
-      renderers[i]->render (&curPainter, shrinkToSquare (QRect (0, 0, pieceWidth, pieceHeight)));
-      delete images[i];
-      images[i] = new QImage (curImage.mirrored (rotatedPieces, rotatedPieces));
-    }
-  }
+  updateImages (renderers, images, pieceSize);
 
-  QPainter boardPainter (targetWidget);
   for (int i = 0; i < nPieces; i++)
   {
-    QRect cellRect = QRect (i * pieceWidth, 0, pieceWidth, pieceHeight);
-    boardPainter.fillRect (cellRect, (i % 2) ^ invertedCells ? blackBackcolor : whiteBackcolor);
-    boardPainter.drawImage (i * pieceWidth, 0, *images [pieces[i]]);
+    QRect cellRect = QRect (QPoint (i * pieceSize.width (), 0) + targetRect.topLeft (), pieceSize);
+    targetPainter->fillRect (cellRect, (i % 2) ^ invertedCells ? blackBackcolor : whiteBackcolor);
+    targetPainter->drawImage (cellRect.topLeft (), images [pieces[i]]->mirrored (rotatedPieces, rotatedPieces));
   }
+
+  targetPainter->setPen (Qt::black);
+  targetPainter->drawRect (targetRect.adjusted (0, 0, -1, -1));
+}
+
+PieceType* MainWindow::getPieces (bool white)
+{
+  return white ? whitePieces : blackPieces;
+}
+
+QSvgRenderer** MainWindow::getRenderers (bool white)
+{
+  return white ? whiteRenderers : blackRenderers;
+}
+
+QImage** MainWindow::getImages (bool white)
+{
+  return white ? whiteImages : blackImages;
+}
+
+QWidget* MainWindow::getDrawWidget (bool white)
+{
+  return white ? ui->whitePiecesWidget : ui->blackPiecesWidget;
+}
+
+void MainWindow::repaintWidget (bool white)
+{
+  QWidget* targetWidget = getDrawWidget (white);
+  QPainter targetPainter (targetWidget);
+
+  if (appSettings->value ("bughouseMode").toBool ()) {
+    int height = targetWidget->height () / 2;
+    int widgetWidth = targetWidget->width ();
+    int width = qBound (widgetWidth * 0.6, height * 8.0, widgetWidth * 0.8);
+
+    renderOneSide (getPieces (white),  &targetPainter, QRect (0,                   0,      width, height), getRenderers (white),  getImages (white),  !white, !white);
+    renderOneSide (getPieces (!white), &targetPainter, QRect (widgetWidth - width, height, width, height), getRenderers (!white), getImages (!white), !white,  white);
+  }
+  else
+    renderOneSide (getPieces (white), &targetPainter, QRect (QPoint (), targetWidget->size ()), getRenderers (white), getImages (white), !white, !white);
 }
 
 bool MainWindow::eventFilter (QObject* qObj, QEvent* qEvent)
@@ -178,7 +221,7 @@ bool MainWindow::eventFilter (QObject* qObj, QEvent* qEvent)
   {
     if (qEvent->type () == QEvent::Paint)
     {
-      renderImages (whitePieces, ui->whitePiecesWidget, whiteRenderers, whiteImages, false, false);
+      repaintWidget (true);
       return true;
     }
     else
@@ -188,7 +231,7 @@ bool MainWindow::eventFilter (QObject* qObj, QEvent* qEvent)
   {
     if (qEvent->type () == QEvent::Paint)
     {
-      renderImages (blackPieces, ui->blackPiecesWidget, blackRenderers, blackImages, true, true);
+      repaintWidget (false);
       return true;
     }
     else

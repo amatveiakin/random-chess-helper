@@ -56,6 +56,12 @@ protected:
 
   QSettings* appSettings;
 
+  PieceType* getPieces (bool white);
+  QSvgRenderer** getRenderers (bool white);
+  QImage** getImages (bool white);
+  QWidget* getDrawWidget (bool white);
+  void repaintWidget (bool white);
+
   void resizeEvent (QResizeEvent* qEvent);
   bool eventFilter (QObject* qObj, QEvent* qEvent);
 
