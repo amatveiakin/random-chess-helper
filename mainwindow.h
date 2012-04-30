@@ -10,6 +10,7 @@ class MainWindow;
 }
 
 class QSvgRenderer;
+class QSettings;
 
 enum PieceType
 {
@@ -42,17 +43,16 @@ public:
   void showExpanded ();
 
 protected:
-  PieceType whitePieces[nPieces];
-  PieceType blackPieces[nPieces];
-  bool forceOppositeColoredBishops;
-  bool forceKingBetweenRooks;
-  bool forceSymmetricPlacing;
+  PieceType whitePieces [nPieces];
+  PieceType blackPieces [nPieces];
 
   QSvgRenderer* whiteRenderers [nPieceTypes];
   QSvgRenderer* blackRenderers [nPieceTypes];
 
   QImage* whiteImages [nPieceTypes];
   QImage* blackImages [nPieceTypes];
+
+  QSettings* appSetting;
 
   void resizeEvent (QResizeEvent* qEvent);
   bool eventFilter (QObject* qObj, QEvent* qEvent);
@@ -66,7 +66,8 @@ private:
 
 private slots:
   void setupNewPlacing ();
-  void updateSetings ();
+  void saveSettings ();
+  void loadSettings ();
 };
 
 #endif // MAINWINDOW_H

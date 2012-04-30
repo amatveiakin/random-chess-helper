@@ -5,8 +5,6 @@
 // TOOD: Make the setting buttons role more obvious: they are not looking like
 //       toggle buttons on my Nokia 5800
 
-// TODO: Save settings
-
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
@@ -16,10 +14,16 @@
 #include <QLayout>
 #include <QPainter>
 #include <QResizeEvent>
+#include <QSettings>
 #include <QtSvg/QSvgRenderer>
+
+
+const QString companyName     = "Andrei's Soft";
+const QString applicationName = "Random chess helper";
 
 const QColor whiteBackcolor = 0xd18b47;
 const QColor blackBackcolor = 0xffce9e;
+
 
 MainWindow::MainWindow (QWidget *parent)
   : QMainWindow (parent), ui (new Ui::MainWindow)
@@ -46,15 +50,16 @@ MainWindow::MainWindow (QWidget *parent)
   blackRenderers [BISHOP] = new QSvgRenderer (QString::fromLatin1 (":/pictures/pieces/black_bishop.svg"), this);
   blackRenderers [KNIGHT] = new QSvgRenderer (QString::fromLatin1 (":/pictures/pieces/black_knight.svg"), this);
 
+  appSetting = new QSettings (companyName, applicationName);
+  loadSettings ();
+
   ui->whitePiecesWidget->installEventFilter (this);
   ui->blackPiecesWidget->installEventFilter (this);
 
   connect (ui->generatePushButton,                    SIGNAL (clicked ()),     SLOT (setupNewPlacing ()));
-  connect (ui->forceOppositeColoredBishopsPushButton, SIGNAL (toggled (bool)), SLOT (updateSetings ()));
-  connect (ui->forceKingBetweenRooksPushButton,       SIGNAL (toggled (bool)), SLOT (updateSetings ()));
-  connect (ui->forceSymmetricPlacingPushButton,       SIGNAL (toggled (bool)), SLOT (updateSetings ()));
-
-  updateSetings ();
+  connect (ui->forceOppositeColoredBishopsPushButton, SIGNAL (toggled (bool)), SLOT (saveSettings ()));
+  connect (ui->forceKingBetweenRooksPushButton,       SIGNAL (toggled (bool)), SLOT (saveSettings ()));
+  connect (ui->forceSymmetricPlacingPushButton,       SIGNAL (toggled (bool)), SLOT (saveSettings ()));
 }
 
 MainWindow::~MainWindow ()
@@ -66,6 +71,7 @@ MainWindow::~MainWindow ()
     delete whiteImages[i];
     delete blackImages[i];
   }
+  delete appSetting;
 }
 
 void MainWindow::setOrientation (ScreenOrientation orientation)
@@ -216,7 +222,7 @@ void MainWindow::generateOnePlayerPlacing (PieceType* pieces)
 {
   std::fill (pieces, pieces + nPieces, UNDEFINED);
 
-  if (forceOppositeColoredBishops)
+  if (appSetting->value ("forceOppositeColoredBishops").toBool ())
   {
     pieces [(rand () % 4) * 2]     = BISHOP;
     pieces [(rand () % 4) * 2 + 1] = BISHOP;
@@ -231,7 +237,7 @@ void MainWindow::generateOnePlayerPlacing (PieceType* pieces)
   addPieceAtPosition (pieces, KNIGHT, rand () % 5);
   addPieceAtPosition (pieces, KNIGHT, rand () % 4);
 
-  if (forceKingBetweenRooks)
+  if (appSetting->value ("forceKingBetweenRooks").toBool ())
     addPieceAtPosition (pieces, KING, 1);
   else
     addPieceAtPosition (pieces, KING, rand () % 3);
@@ -244,7 +250,7 @@ void MainWindow::generatePlacing ()
 {
   generateOnePlayerPlacing (whitePieces);
 
-  if (forceSymmetricPlacing)
+  if (appSetting->value ("forceSymmetricPlacing").toBool ())
     std::copy (whitePieces, whitePieces + nPieces, blackPieces);
   else
     generateOnePlayerPlacing (blackPieces);
@@ -257,9 +263,16 @@ void MainWindow::setupNewPlacing ()
   ui->blackPiecesWidget->update ();
 }
 
-void MainWindow::updateSetings ()
+void MainWindow::saveSettings ()
 {
-  forceOppositeColoredBishops = ui->forceOppositeColoredBishopsPushButton->isChecked ();
-  forceKingBetweenRooks       = ui->forceKingBetweenRooksPushButton->      isChecked ();
-  forceSymmetricPlacing       = ui->forceSymmetricPlacingPushButton->      isChecked ();
+  appSetting->setValue ("forceOppositeColoredBishops",  ui->forceOppositeColoredBishopsPushButton->isChecked ());
+  appSetting->setValue ("forceKingBetweenRooks",        ui->forceKingBetweenRooksPushButton->      isChecked ());
+  appSetting->setValue ("forceSymmetricPlacing",        ui->forceSymmetricPlacingPushButton->      isChecked ());
+}
+
+void MainWindow::loadSettings ()
+{
+  ui->forceOppositeColoredBishopsPushButton->setChecked (appSetting->value ("forceOppositeColoredBishops", false).toBool ());
+  ui->forceKingBetweenRooksPushButton      ->setChecked (appSetting->value ("forceKingBetweenRooks",       false).toBool ());
+  ui->forceSymmetricPlacingPushButton      ->setChecked (appSetting->value ("forceSymmetricPlacing",       false).toBool ());
 }
