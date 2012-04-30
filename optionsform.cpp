@@ -10,9 +10,9 @@ OptionsForm::OptionsForm (QSettings *applicationSettings, QWidget *parent) :
   ui->setupUi (this);
 
   appSettings = applicationSettings;
-  ui->forceOppositeColoredBishopsCheckBox->setChecked (appSettings->value ("forceOppositeColoredBishops", false).toBool ());
-  ui->forceKingBetweenRooksCheckBox      ->setChecked (appSettings->value ("forceKingBetweenRooks",       false).toBool ());
-  ui->forceSymmetricPlacingCheckBox      ->setChecked (appSettings->value ("forceSymmetricPlacing",       false).toBool ());
+  ui->forceOppositeColoredBishopsCheckBox->setChecked (appSettings->value ("forceOppositeColoredBishops", true).toBool ());
+  ui->forceKingBetweenRooksCheckBox      ->setChecked (appSettings->value ("forceKingBetweenRooks",       true).toBool ());
+  ui->forceSymmetricPlacingCheckBox      ->setChecked (appSettings->value ("forceSymmetricPlacing",       true).toBool ());
 
   connect (ui->forceOppositeColoredBishopsCheckBox, SIGNAL (toggled (bool)), SLOT (applySettings ()));
   connect (ui->forceKingBetweenRooksCheckBox,       SIGNAL (toggled (bool)), SLOT (applySettings ()));
