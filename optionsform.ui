@@ -15,7 +15,7 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QCheckBox" name="forceOppositeColoredBishopsCheckBox">
+    <widget class="QCheckBox" name="oppositeColoredBishopsCheckBox">
      <property name="text">
       <string>Opposite-colored Bishops</string>
      </property>
@@ -25,7 +25,7 @@
     </widget>
    </item>
    <item>
-    <widget class="QCheckBox" name="forceKingBetweenRooksCheckBox">
+    <widget class="QCheckBox" name="kingBetweenRooksCheckBox">
      <property name="text">
       <string>King between Rooks</string>
      </property>
@@ -35,7 +35,7 @@
     </widget>
    </item>
    <item>
-    <widget class="QCheckBox" name="forceSymmetricPlacingCheckBox">
+    <widget class="QCheckBox" name="symmetricPlacingCheckBox">
      <property name="text">
       <string>Symmetric Placing</string>
      </property>

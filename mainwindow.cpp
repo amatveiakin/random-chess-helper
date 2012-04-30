@@ -27,8 +27,7 @@ MainWindow::MainWindow (QWidget *parent)
 
   ui->setupUi (this);
 
-  std::fill (whitePieces, whitePieces + nPieces, UNDEFINED);
-  std::fill (blackPieces, blackPieces + nPieces, UNDEFINED);
+  clearPosition ();
 
   std::fill (whiteImages, whiteImages + nPieceTypes, (QImage*) 0);
   std::fill (blackImages, blackImages + nPieceTypes, (QImage*) 0);
@@ -127,14 +126,34 @@ void MainWindow::showExpanded ()
 #endif
 }
 
+void MainWindow::applySettings ()
+{
+  clearPosition ();
+  updateLayout (size ());
+}
+
+void MainWindow::updateLayout (QSize size)
+{
+  double generateButtionHeightCoeff;
+  double otherButtionsHeightCoeff;
+
+  if (appSettings->value ("bughouseMode").toBool ()) {
+    generateButtionHeightCoeff = 1. / 4.;
+    otherButtionsHeightCoeff   = 1. / 5.;
+  }
+  else {
+    generateButtionHeightCoeff = 1. / 3.;
+    otherButtionsHeightCoeff   = 1. / 4.;
+  }
+
+  ui->generatePushButton->setMinimumHeight (size.height () * generateButtionHeightCoeff);
+  ui->optionsPushButton-> setMinimumHeight (size.height () * otherButtionsHeightCoeff);
+  ui->quitPushButton->    setMinimumHeight (size.height () * otherButtionsHeightCoeff);
+}
+
 void MainWindow::resizeEvent (QResizeEvent* qEvent)
 {
-  const double generateButtionHeight = 1. / 3.;
-  const double otherButtionsHeight   = 1. / 4.;
-
-  ui->generatePushButton->setMinimumHeight (qEvent->size ().height () * generateButtionHeight);
-  ui->optionsPushButton-> setMinimumHeight (qEvent->size ().height () * otherButtionsHeight);
-  ui->quitPushButton->    setMinimumHeight (qEvent->size ().height () * otherButtionsHeight);
+  updateLayout (qEvent->size ());
 }
 
 static QRect shrinkToSquare (const QRect& rect)
@@ -198,6 +217,7 @@ QWidget* MainWindow::getDrawWidget (bool white)
   return white ? ui->whitePiecesWidget : ui->blackPiecesWidget;
 }
 
+// TODO: make rectangles change layout to horizontal when it's appropriate
 void MainWindow::repaintWidget (bool white)
 {
   QWidget* targetWidget = getDrawWidget (white);
@@ -241,6 +261,12 @@ bool MainWindow::eventFilter (QObject* qObj, QEvent* qEvent)
     return QMainWindow::eventFilter(qObj, qEvent);
 }
 
+void MainWindow::clearPosition ()
+{
+  std::fill (whitePieces, whitePieces + nPieces, UNDEFINED);
+  std::fill (blackPieces, blackPieces + nPieces, UNDEFINED);
+}
+
 static void addPieceAtPosition (PieceType* pieces, PieceType newPiece, int pos)
 {
   for (int i = 0; i < nPieces; i++)
@@ -262,7 +288,7 @@ void MainWindow::generateOnePlayerPlacing (PieceType* pieces)
 {
   std::fill (pieces, pieces + nPieces, UNDEFINED);
 
-  if (appSettings->value ("forceOppositeColoredBishops").toBool ())
+  if (appSettings->value ("oppositeColoredBishops").toBool ())
   {
     pieces [(rand () % 4) * 2]     = BISHOP;
     pieces [(rand () % 4) * 2 + 1] = BISHOP;
@@ -277,7 +303,7 @@ void MainWindow::generateOnePlayerPlacing (PieceType* pieces)
   addPieceAtPosition (pieces, KNIGHT, rand () % 5);
   addPieceAtPosition (pieces, KNIGHT, rand () % 4);
 
-  if (appSettings->value ("forceKingBetweenRooks").toBool ())
+  if (appSettings->value ("kingBetweenRooks").toBool ())
     addPieceAtPosition (pieces, KING, 1);
   else
     addPieceAtPosition (pieces, KING, rand () % 3);
@@ -290,7 +316,7 @@ void MainWindow::generatePlacing ()
 {
   generateOnePlayerPlacing (whitePieces);
 
-  if (appSettings->value ("forceSymmetricPlacing").toBool ())
+  if (appSettings->value ("symmetricPlacing").toBool ())
     std::copy (whitePieces, whitePieces + nPieces, blackPieces);
   else
     generateOnePlayerPlacing (blackPieces);
@@ -306,6 +332,6 @@ void MainWindow::setupNewPlacing ()
 void MainWindow::showOptions ()
 {
   if (!optionsForm)
-    optionsForm = new OptionsForm (appSettings);
+    optionsForm = new OptionsForm (appSettings, this);
   optionsForm->show ();
 }

@@ -44,6 +44,8 @@ public:
 
   void showExpanded ();
 
+  void applySettings ();
+
 protected:
   PieceType whitePieces [nPieces];
   PieceType blackPieces [nPieces];
@@ -62,9 +64,12 @@ protected:
   QWidget* getDrawWidget (bool white);
   void repaintWidget (bool white);
 
+  void updateLayout (QSize size);
+
   void resizeEvent (QResizeEvent* qEvent);
   bool eventFilter (QObject* qObj, QEvent* qEvent);
 
+  void clearPosition ();
   void generateOnePlayerPlacing (PieceType* pieces);
   void generatePlacing ();
 

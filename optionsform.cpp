@@ -1,24 +1,28 @@
-#include <QSettings>
-
 #include "optionsform.h"
 #include "ui_optionsform.h"
 
-OptionsForm::OptionsForm (QSettings *applicationSettings, QWidget *parent) :
+#include <QSettings>
+
+#include "mainwindow.h"
+
+OptionsForm::OptionsForm (QSettings* appSettings_, MainWindow* mainWindow_, QWidget *parent) :
   QWidget (parent),
   ui (new Ui::OptionsForm)
 {
   ui->setupUi (this);
 
-  appSettings = applicationSettings;
-  ui->forceOppositeColoredBishopsCheckBox->setChecked (appSettings->value ("forceOppositeColoredBishops", true).toBool ());
-  ui->forceKingBetweenRooksCheckBox      ->setChecked (appSettings->value ("forceKingBetweenRooks",       true).toBool ());
-  ui->forceSymmetricPlacingCheckBox      ->setChecked (appSettings->value ("forceSymmetricPlacing",       true).toBool ());
-  ui->bughouseModeCheckBox               ->setChecked (appSettings->value ("bughouseMode",               false).toBool ());
+  appSettings = appSettings_;
+  mainWindow  = mainWindow_;
 
-  connect (ui->forceOppositeColoredBishopsCheckBox, SIGNAL (toggled (bool)), SLOT (applySettings ()));
-  connect (ui->forceKingBetweenRooksCheckBox,       SIGNAL (toggled (bool)), SLOT (applySettings ()));
-  connect (ui->forceSymmetricPlacingCheckBox,       SIGNAL (toggled (bool)), SLOT (applySettings ()));
-  connect (ui->bughouseModeCheckBox,                SIGNAL (toggled (bool)), SLOT (applySettings ()));
+  ui->oppositeColoredBishopsCheckBox->setChecked (appSettings->value ("oppositeColoredBishops", true).toBool ());
+  ui->kingBetweenRooksCheckBox      ->setChecked (appSettings->value ("kingBetweenRooks",       true).toBool ());
+  ui->symmetricPlacingCheckBox      ->setChecked (appSettings->value ("symmetricPlacing",       true).toBool ());
+  ui->bughouseModeCheckBox          ->setChecked (appSettings->value ("bughouseMode",               false).toBool ());
+
+  connect (ui->oppositeColoredBishopsCheckBox, SIGNAL (toggled (bool)), SLOT (applySettings ()));
+  connect (ui->kingBetweenRooksCheckBox,       SIGNAL (toggled (bool)), SLOT (applySettings ()));
+  connect (ui->symmetricPlacingCheckBox,       SIGNAL (toggled (bool)), SLOT (applySettings ()));
+  connect (ui->bughouseModeCheckBox,           SIGNAL (toggled (bool)), SLOT (applySettings ()));
 
   connect (ui->buttonBox, SIGNAL (accepted ()), SLOT (close ()));
 }
@@ -30,8 +34,9 @@ OptionsForm::~OptionsForm()
 
 void OptionsForm::applySettings ()
 {
-  appSettings->setValue ("forceOppositeColoredBishops",  ui->forceOppositeColoredBishopsCheckBox->isChecked ());
-  appSettings->setValue ("forceKingBetweenRooks",        ui->forceKingBetweenRooksCheckBox->      isChecked ());
-  appSettings->setValue ("forceSymmetricPlacing",        ui->forceSymmetricPlacingCheckBox->      isChecked ());
-  appSettings->setValue ("bughouseMode",                 ui->bughouseModeCheckBox->               isChecked ());
+  appSettings->setValue ("oppositeColoredBishops",  ui->oppositeColoredBishopsCheckBox->isChecked ());
+  appSettings->setValue ("kingBetweenRooks",        ui->kingBetweenRooksCheckBox->      isChecked ());
+  appSettings->setValue ("symmetricPlacing",        ui->symmetricPlacingCheckBox->      isChecked ());
+  appSettings->setValue ("bughouseMode",            ui->bughouseModeCheckBox->          isChecked ());
+  mainWindow->applySettings ();
 }
