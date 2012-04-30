@@ -60,6 +60,12 @@ MainWindow::MainWindow (QWidget *parent)
 MainWindow::~MainWindow ()
 {
   delete ui;
+  for (int i = 0; i < nPieceTypes; i++) {
+    delete whiteRenderers[i];
+    delete blackRenderers[i];
+    delete whiteImages[i];
+    delete blackImages[i];
+  }
 }
 
 void MainWindow::setOrientation (ScreenOrientation orientation)
