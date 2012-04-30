@@ -23,6 +23,7 @@ symbian:TARGET.UID3 = 0xE3F4466D
 # MOBILITY +=
 
 QT += svg
+QMAKE_CXXFLAGS += -Wall -Wextra
 SOURCES += main.cpp mainwindow.cpp \
     optionsform.cpp
 HEADERS += mainwindow.h \
