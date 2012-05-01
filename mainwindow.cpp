@@ -223,30 +223,18 @@ QWidget* MainWindow::getDrawWidget (bool white)
   return white ? ui->whitePiecesWidget : ui->blackPiecesWidget;
 }
 
-static bool makeVerticalLayout (QSize size, QRect& box1, QRect& box2)
+static bool makeLayout (QSize size, QRect& box1, QRect& box2, bool aligned_left)
 {
   const double maxWidthCoeff = 0.8;
-  const double minWidthCoeff = 0.55;
 
   int height = size.height () / 2;
   int width = qMin (height * 8, (int) (size.width () * maxWidthCoeff));
+  int left = aligned_left ? 0 : size.width () - width;
 
-  if (width < size.width () * minWidthCoeff)
-    return false;
-
-  box1 = QRect (0,                   0,        width, height);
-  box2 = QRect (size.width () - width, height, width, height);
+  box1 = QRect (left, 0,      width, height);
+  box2 = QRect (left, height, width, height);
 
   return true;
-}
-
-static void makeHorizontalLayout (QSize size, QRect& box1, QRect& box2)
-{
-  int height = size.height ();
-  int width = size.width () / 2;
-
-  box1 = QRect (0,     0, width, height);
-  box2 = QRect (width, 0, width, height);
 }
 
 void MainWindow::repaintWidget (bool white)
@@ -256,11 +244,10 @@ void MainWindow::repaintWidget (bool white)
 
   if (appSettings->value ("bughouseMode").toBool ()) {
     QRect board1, board2;
-    if (!makeVerticalLayout (targetWidget->size (), board1, board2))
-      makeHorizontalLayout (targetWidget->size (), board1, board2);
+    makeLayout (targetWidget->size (), board1, board2, !white);
 
-    renderOneSide (getPieces (white),  &targetPainter, board1, getRenderers (white),  getImages (white),  !white, !white, false);
-    renderOneSide (getPieces (!white), &targetPainter, board2, getRenderers (!white), getImages (!white), !white, !white, true );
+    renderOneSide (getPieces (white),  &targetPainter, board1, getRenderers (!white), getImages (!white), true,  true,  !white);
+    renderOneSide (getPieces (!white), &targetPainter, board2, getRenderers (white),  getImages (white),  false, false, !white);
   }
   else
     renderOneSide (getPieces (white), &targetPainter, QRect (QPoint (), targetWidget->size ()), getRenderers (white), getImages (white), !white, !white, false);
