@@ -249,7 +249,6 @@ static void makeHorizontalLayout (QSize size, QRect& box1, QRect& box2)
   box2 = QRect (width, 0, width, height);
 }
 
-// TODO: make rectangles change layout to horizontal when it's appropriate
 void MainWindow::repaintWidget (bool white)
 {
   QWidget* targetWidget = getDrawWidget (white);
