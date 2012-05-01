@@ -192,8 +192,7 @@ static void renderOneSide (PieceType* pieces, QPainter* targetPainter, QRect tar
 
   updateImages (renderers, images, pieceSize);
 
-  for (int i = 0; i < nPieces; i++)
-  {
+  for (int i = 0; i < nPieces; i++) {
     QRect cellRect = QRect (QPoint (i * pieceSize.width (), 0) + targetRect.topLeft (), pieceSize);
     targetPainter->fillRect (cellRect, (i % 2) ^ invertedCells ? blackBackcolor : whiteBackcolor);
     PieceType piece = pieces [invertOrder ? (nPieces - i - 1) : i];
@@ -270,20 +269,16 @@ void MainWindow::repaintWidget (bool white)
 
 bool MainWindow::eventFilter (QObject* qObj, QEvent* qEvent)
 {
-  if (qObj == ui->whitePiecesWidget)
-  {
-    if (qEvent->type () == QEvent::Paint)
-    {
+  if (qObj == ui->whitePiecesWidget) {
+    if (qEvent->type () == QEvent::Paint) {
       repaintWidget (true);
       return true;
     }
     else
       return false;
   }
-  else if (qObj == ui->blackPiecesWidget)
-  {
-    if (qEvent->type () == QEvent::Paint)
-    {
+  else if (qObj == ui->blackPiecesWidget) {
+    if (qEvent->type () == QEvent::Paint) {
       repaintWidget (false);
       return true;
     }
@@ -302,12 +297,9 @@ void MainWindow::clearPosition ()
 
 static void addPieceAtPosition (PieceType* pieces, PieceType newPiece, int pos)
 {
-  for (int i = 0; i < nPieces; i++)
-  {
-    if (pieces[i] == UNDEFINED)
-    {
-      if (pos == 0)
-      {
+  for (int i = 0; i < nPieces; i++) {
+    if (pieces[i] == UNDEFINED) {
+      if (pos == 0) {
         pieces[i] = newPiece;
         return;
       }
@@ -321,13 +313,11 @@ void MainWindow::generateOnePlayerPlacing (PieceType* pieces)
 {
   std::fill (pieces, pieces + nPieces, UNDEFINED);
 
-  if (appSettings->value ("oppositeColoredBishops").toBool ())
-  {
+  if (appSettings->value ("oppositeColoredBishops").toBool ()) {
     pieces [(rand () % 4) * 2]     = BISHOP;
     pieces [(rand () % 4) * 2 + 1] = BISHOP;
   }
-  else
-  {
+  else {
     addPieceAtPosition (pieces, BISHOP, rand () % 8);
     addPieceAtPosition (pieces, BISHOP, rand () % 7);
   }
