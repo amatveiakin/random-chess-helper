@@ -247,7 +247,7 @@ void MainWindow::repaintWidget (bool white)
 
   if (appSettings->value ("bughouseMode").toBool ()) {
     QRect board1, board2;
-    makeLayout (targetWidget->size (), board1, board2, !white);
+    makeLayout (targetWidget->size (), board1, board2, white);
 
     renderOneSide (getPieces (white),  &targetPainter, board1, getRenderers (!white), getImages (!white), true,  true,  !white);
     renderOneSide (getPieces (!white), &targetPainter, board2, getRenderers (white),  getImages (white),  false, false, !white);
