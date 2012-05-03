@@ -20,14 +20,16 @@ public:
   explicit OptionsForm (QSettings* appSettings_, MainWindow* mainWindow_, QWidget* parent = 0);
   ~OptionsForm ();
 
+  void updateLayout (QSize size);
+
 protected:
   QSettings* appSettings;
   MainWindow* mainWindow;
 
-  void closeEvent (QCloseEvent *event);
+  void closeEvent (QCloseEvent* event);
 
 private:
-  Ui::OptionsForm *ui;
+  Ui::OptionsForm* ui;
 
 private slots:
   void applySettings ();

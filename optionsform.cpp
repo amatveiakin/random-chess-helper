@@ -3,11 +3,12 @@
 
 #include <QCloseEvent>
 #include <QPushButton>
+#include <QResizeEvent>
 #include <QSettings>
 
 #include "mainwindow.h"
 
-OptionsForm::OptionsForm (QSettings* appSettings_, MainWindow* mainWindow_, QWidget *parent) :
+OptionsForm::OptionsForm (QSettings* appSettings_, MainWindow* mainWindow_, QWidget* parent) :
   QWidget (parent),
   ui (new Ui::OptionsForm)
 {
@@ -15,17 +16,6 @@ OptionsForm::OptionsForm (QSettings* appSettings_, MainWindow* mainWindow_, QWid
 
   appSettings = appSettings_;
   mainWindow  = mainWindow_;
-
-  const int minHeight = height () / 6;
-
-  QPushButton* okButton = ui->buttonBox->button (QDialogButtonBox::Ok);
-  if (okButton)
-    okButton->setMinimumSize (width () / 2, minHeight);
-
-  ui->oppositeColoredBishopsCheckBox->setMinimumHeight (minHeight);
-  ui->kingBetweenRooksCheckBox      ->setMinimumHeight (minHeight);
-  ui->symmetricPlacingCheckBox      ->setMinimumHeight (minHeight);
-  ui->bughouseModeCheckBox          ->setMinimumHeight (minHeight);
 
   ui->oppositeColoredBishopsCheckBox->setChecked (appSettings->value ("oppositeColoredBishops", true).toBool ());
   ui->kingBetweenRooksCheckBox      ->setChecked (appSettings->value ("kingBetweenRooks",       true).toBool ());
@@ -54,7 +44,21 @@ void OptionsForm::applySettings ()
   mainWindow->applySettings ();
 }
 
-void OptionsForm::closeEvent (QCloseEvent *event)
+void OptionsForm::updateLayout (QSize size)
+{
+  const int minHeight = size.height () / 6;
+
+  QPushButton* okButton = ui->buttonBox->button (QDialogButtonBox::Ok);
+  if (okButton)
+    okButton->setMinimumSize (width () / 2, minHeight);
+
+  ui->oppositeColoredBishopsCheckBox->setMinimumHeight (minHeight);
+  ui->kingBetweenRooksCheckBox      ->setMinimumHeight (minHeight);
+  ui->symmetricPlacingCheckBox      ->setMinimumHeight (minHeight);
+  ui->bughouseModeCheckBox          ->setMinimumHeight (minHeight);
+}
+
+void OptionsForm::closeEvent (QCloseEvent* event)
 {
   mainWindow->hideOptions ();
   event->accept();

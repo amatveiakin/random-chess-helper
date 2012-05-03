@@ -155,6 +155,9 @@ void MainWindow::updateLayout (QSize size)
   ui->generatePushButton->setMinimumHeight (size.height () * generateButtionHeightCoeff);
   ui->optionsPushButton-> setMinimumHeight (size.height () * otherButtionsHeightCoeff);
   ui->quitPushButton->    setMinimumHeight (size.height () * otherButtionsHeightCoeff);
+
+  if (optionsForm)
+    optionsForm->updateLayout (size);
 }
 
 void MainWindow::resizeEvent (QResizeEvent* qEvent)
