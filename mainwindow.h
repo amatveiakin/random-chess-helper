@@ -34,9 +34,12 @@ public:
   explicit MainWindow (QWidget *parent = 0);
   virtual ~MainWindow ();
 
+public slots:
   void applySettings ();
+  void showOptions ();
+  void hideOptions ();
 
-protected:
+private:
   PieceType whitePieces [nPieces];
   PieceType blackPieces [nPieces];
 
@@ -48,29 +51,23 @@ protected:
 
   QSettings* appSettings;
 
-  PieceType* getPieces (bool white);
-  QSvgRenderer** getRenderers (bool white);
-  QImage** getImages (bool white);
-  QWidget* getDrawWidget (bool white);
-  void repaintWidget (bool white);
-
-  void updateLayout (QSize size);
-
-  void resizeEvent (QResizeEvent* qEvent);
-  bool eventFilter (QObject* qObj, QEvent* qEvent);
-
-  void clearPosition ();
-  void generateOnePlayerPlacing (PieceType* pieces);
-  void generatePlacing ();
-
-private:
   Ui::MainWindow* ui;
   QStackedLayout* mainLayout;
   OptionsForm* optionsForm;
 
-public slots:
-  void showOptions ();
-  void hideOptions ();
+  PieceType* getPieces (bool white);
+  QSvgRenderer** getRenderers (bool white);
+  QImage** getImages (bool white);
+  QWidget* getDrawWidget (bool white);
+
+  void resizeEvent (QResizeEvent* qEvent);
+  bool eventFilter (QObject* qObj, QEvent* qEvent);
+
+  void repaintWidget (bool white);
+  void updateLayout (QSize size);
+  void clearPosition ();
+  void generateOnePlayerPlacing (PieceType* pieces);
+  void generatePlacing ();
 
 private slots:
   void setupNewPlacing ();

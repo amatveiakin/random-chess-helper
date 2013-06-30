@@ -17,19 +17,21 @@ class OptionsForm : public QWidget
   Q_OBJECT
 
 public:
-  explicit OptionsForm (QSettings* appSettings_, MainWindow* mainWindow_, QWidget* parent = 0);
+  explicit OptionsForm (QSettings* appSettings_, QWidget* parent = 0);
   ~OptionsForm ();
 
   void updateLayout (QSize size);
 
-protected:
-  QSettings* appSettings;
-  MainWindow* mainWindow;
-
-  void closeEvent (QCloseEvent* event);
+signals:
+  void settingsChanged ();
+  void optionsClosed ();
 
 private:
+  QSettings* appSettings;
+
   Ui::OptionsForm* ui;
+
+  void closeEvent (QCloseEvent* event);
 
 private slots:
   void applySettings ();

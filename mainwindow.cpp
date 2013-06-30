@@ -26,6 +26,9 @@ int physicalDpi = -1;  // Uninitialized
 int clickableElementSize  = -1;  // Uninitialized
 
 
+//======================================================================================================================
+// public
+
 MainWindow::MainWindow (QWidget *parent)
   : QMainWindow (parent)
   , ui (new Ui::MainWindow)
@@ -82,6 +85,9 @@ MainWindow::MainWindow (QWidget *parent)
   connect (ui->generatePushButton, SIGNAL (clicked ()), SLOT (setupNewPlacing ()));
   connect (ui->optionsPushButton,  SIGNAL (clicked ()), SLOT (showOptions ()));
   connect (ui->quitPushButton,     SIGNAL (clicked ()), SLOT (close ()));
+
+  connect (optionsForm, SIGNAL (settingsChanged ()), SLOT (applySettings ()));
+  connect (optionsForm, SIGNAL (optionsClosed ()),   SLOT (hideOptions ()));
 }
 
 MainWindow::~MainWindow ()
@@ -103,31 +109,79 @@ void MainWindow::applySettings ()
   updateLayout (size ());
 }
 
-void MainWindow::updateLayout (QSize size)
+void MainWindow::showOptions ()
 {
-  double generateButtionHeightCoeff;
-  double otherButtionsHeightCoeff;
+  mainLayout->setCurrentWidget (optionsForm);
+}
 
-  if (appSettings->value ("bughouseMode").toBool ()) {
-    generateButtionHeightCoeff = 1. / 5.;
-    otherButtionsHeightCoeff   = 1. / 6.;
-  }
-  else {
-    generateButtionHeightCoeff = 1. / 3.;
-    otherButtionsHeightCoeff   = 1. / 4.;
-  }
+void MainWindow::hideOptions ()
+{
+  mainLayout->setCurrentWidget (ui->formWidget);
+}
 
-  ui->generatePushButton->setMinimumHeight (size.height () * generateButtionHeightCoeff);
-  ui->optionsPushButton-> setMinimumHeight (size.height () * otherButtionsHeightCoeff);
-  ui->quitPushButton->    setMinimumHeight (size.height () * otherButtionsHeightCoeff);
 
-  if (optionsForm)
-    optionsForm->updateLayout (size);
+//======================================================================================================================
+// private
+
+PieceType* MainWindow::getPieces (bool white)
+{
+  return white ? whitePieces : blackPieces;
+}
+
+QSvgRenderer** MainWindow::getRenderers (bool white)
+{
+  return white ? whiteRenderers : blackRenderers;
+}
+
+QImage** MainWindow::getImages (bool white)
+{
+  return white ? whiteImages : blackImages;
+}
+
+QWidget* MainWindow::getDrawWidget (bool white)
+{
+  return white ? ui->whitePiecesWidget : ui->blackPiecesWidget;
 }
 
 void MainWindow::resizeEvent (QResizeEvent* qEvent)
 {
   updateLayout (qEvent->size ());
+}
+
+bool MainWindow::eventFilter (QObject* qObj, QEvent* qEvent)
+{
+  if (qObj == ui->whitePiecesWidget) {
+    if (qEvent->type () == QEvent::Paint) {
+      repaintWidget (true);
+      return true;
+    }
+    else
+      return false;
+  }
+  else if (qObj == ui->blackPiecesWidget) {
+    if (qEvent->type () == QEvent::Paint) {
+      repaintWidget (false);
+      return true;
+    }
+    else
+      return false;
+  }
+  else
+    return QMainWindow::eventFilter (qObj, qEvent);
+}
+
+static bool makeLayout (QSize size, QRect& box1, QRect& box2, bool alignedLeft)
+{
+  const double maxWidthCoeff = 0.8;
+
+  int height = size.height () / 2;
+  int width = qMin (height * 8, (int) (size.width () * maxWidthCoeff));
+  int left = alignedLeft ? 0 : size.width () - width;
+
+  box1 = QRect (left, 0,      width, height);
+  box2 = QRect (left, height, width, height);
+
+  return true;
 }
 
 static QRect shrinkToSquare (const QRect& rect)
@@ -151,7 +205,8 @@ static void updateImages (QSvgRenderer** renderers, QImage** images, QSize newSi
   }
 }
 
-static void renderOneSide (PieceType* pieces, QPainter* targetPainter, QRect targetRect, QSvgRenderer** renderers, QImage** images, bool rotatedPieces, bool invertedCells, bool invertOrder)
+static void renderOneSide (PieceType* pieces, QPainter* targetPainter, QRect targetRect, QSvgRenderer** renderers, QImage** images,
+                           bool rotatedPieces, bool invertedCells, bool invertOrder)
 {
   if (pieces[0] == UNDEFINED)
     return;
@@ -171,40 +226,6 @@ static void renderOneSide (PieceType* pieces, QPainter* targetPainter, QRect tar
   targetPainter->drawRect (QRect (targetRect.topLeft (), QSize (pieceSize.width () * nPieces - 1, pieceSize.height () - 1)));
 }
 
-PieceType* MainWindow::getPieces (bool white)
-{
-  return white ? whitePieces : blackPieces;
-}
-
-QSvgRenderer** MainWindow::getRenderers (bool white)
-{
-  return white ? whiteRenderers : blackRenderers;
-}
-
-QImage** MainWindow::getImages (bool white)
-{
-  return white ? whiteImages : blackImages;
-}
-
-QWidget* MainWindow::getDrawWidget (bool white)
-{
-  return white ? ui->whitePiecesWidget : ui->blackPiecesWidget;
-}
-
-static bool makeLayout (QSize size, QRect& box1, QRect& box2, bool alignedLeft)
-{
-  const double maxWidthCoeff = 0.8;
-
-  int height = size.height () / 2;
-  int width = qMin (height * 8, (int) (size.width () * maxWidthCoeff));
-  int left = alignedLeft ? 0 : size.width () - width;
-
-  box1 = QRect (left, 0,      width, height);
-  box2 = QRect (left, height, width, height);
-
-  return true;
-}
-
 void MainWindow::repaintWidget (bool white)
 {
   QWidget* targetWidget = getDrawWidget (white);
@@ -221,26 +242,26 @@ void MainWindow::repaintWidget (bool white)
     renderOneSide (getPieces (white), &targetPainter, QRect (QPoint (), targetWidget->size ()), getRenderers (white), getImages (white), !white, !white, false);
 }
 
-bool MainWindow::eventFilter (QObject* qObj, QEvent* qEvent)
+void MainWindow::updateLayout (QSize size)
 {
-  if (qObj == ui->whitePiecesWidget) {
-    if (qEvent->type () == QEvent::Paint) {
-      repaintWidget (true);
-      return true;
-    }
-    else
-      return false;
+  double generateButtionHeightCoeff;
+  double otherButtionsHeightCoeff;
+
+  if (appSettings->value ("bughouseMode").toBool ()) {
+    generateButtionHeightCoeff = 1. / 5.;
+    otherButtionsHeightCoeff   = 1. / 6.;
   }
-  else if (qObj == ui->blackPiecesWidget) {
-    if (qEvent->type () == QEvent::Paint) {
-      repaintWidget (false);
-      return true;
-    }
-    else
-      return false;
+  else {
+    generateButtionHeightCoeff = 1. / 3.;
+    otherButtionsHeightCoeff   = 1. / 4.;
   }
-  else
-    return QMainWindow::eventFilter (qObj, qEvent);
+
+  ui->generatePushButton->setMinimumHeight (size.height () * generateButtionHeightCoeff);
+  ui->optionsPushButton-> setMinimumHeight (size.height () * otherButtionsHeightCoeff);
+  ui->quitPushButton->    setMinimumHeight (size.height () * otherButtionsHeightCoeff);
+
+  if (optionsForm)
+    optionsForm->updateLayout (size);
 }
 
 void MainWindow::clearPosition ()
@@ -304,14 +325,4 @@ void MainWindow::setupNewPlacing ()
   generatePlacing ();
   ui->whitePiecesWidget->update ();
   ui->blackPiecesWidget->update ();
-}
-
-void MainWindow::showOptions ()
-{
-  mainLayout->setCurrentWidget (optionsForm);
-}
-
-void MainWindow::hideOptions ()
-{
-  mainLayout->setCurrentWidget (ui->formWidget);
 }

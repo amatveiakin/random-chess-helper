@@ -9,14 +9,17 @@
 #include "defines.h"
 #include "mainwindow.h"
 
-OptionsForm::OptionsForm (QSettings* appSettings_, MainWindow* mainWindow_, QWidget* parent)
+
+//======================================================================================================================
+// public
+
+OptionsForm::OptionsForm (QSettings* appSettings_, QWidget* parent)
   : QWidget (parent)
   , ui (new Ui::OptionsForm)
 {
   ui->setupUi (this);
 
   appSettings = appSettings_;
-  mainWindow  = mainWindow_;
 
   ui->oppositeColoredBishopsCheckBox->setChecked (appSettings->value ("oppositeColoredBishops", true).toBool ());
   ui->kingBetweenRooksCheckBox      ->setChecked (appSettings->value ("kingBetweenRooks",       true).toBool ());
@@ -42,7 +45,7 @@ void OptionsForm::applySettings ()
   appSettings->setValue ("kingBetweenRooks",        ui->kingBetweenRooksCheckBox->      isChecked ());
   appSettings->setValue ("symmetricPlacing",        ui->symmetricPlacingCheckBox->      isChecked ());
   appSettings->setValue ("bughouseMode",            ui->bughouseModeCheckBox->          isChecked ());
-  mainWindow->applySettings ();
+  emit settingsChanged ();
 }
 
 void OptionsForm::updateLayout (QSize size)
@@ -59,8 +62,12 @@ void OptionsForm::updateLayout (QSize size)
   ui->bughouseModeCheckBox          ->setMinimumHeight (minHeight);
 }
 
+
+//======================================================================================================================
+// private
+
 void OptionsForm::closeEvent (QCloseEvent* event)
 {
-  mainWindow->hideOptions ();
   event->accept ();
+  emit optionsClosed ();
 }
