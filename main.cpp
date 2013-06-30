@@ -1,14 +1,13 @@
 #include "mainwindow.h"
 
-#include <QtGui/QApplication>
+#include <QApplication>
 
 int main(int argc, char *argv[])
 {
   QApplication app(argc, argv);
 
   MainWindow mainWindow;
-  mainWindow.setOrientation(MainWindow::ScreenOrientationLockLandscape);
-  mainWindow.showExpanded();
+  mainWindow.show();
 
   return app.exec();
 }
