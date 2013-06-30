@@ -22,27 +22,27 @@ const QString applicationName = "Random chess helper";
 const QColor whiteBackcolor = 0xd18b47;
 const QColor blackBackcolor = 0xffce9e;
 
-int physical_dpi = -1;  // Uninitialized
-int clickable_element_size  = -1;  // Uninitialized
+int physicalDpi = -1;  // Uninitialized
+int clickableElementSize  = -1;  // Uninitialized
 
 
 MainWindow::MainWindow (QWidget *parent)
   : QMainWindow (parent)
   , ui (new Ui::MainWindow)
 {
-  srand (QDateTime::currentDateTime().toMSecsSinceEpoch ());
+  srand (QDateTime::currentDateTime ().toMSecsSinceEpoch ());
 
-  physical_dpi = (physicalDpiX () + physicalDpiY ()) / 2;
-  clickable_element_size  = clickable_element_size_in_inch * physical_dpi;
-  int checkbox_indicator_size = clickable_element_size * relative_checkbox_indicator_size;
+  physicalDpi = (physicalDpiX () + physicalDpiY ()) / 2;
+  clickableElementSize  = clickableElementSizeInInch * physicalDpi;
+  int checkboxIndicatorSize = clickableElementSize * relativeCheckboxIndicatorSize;
   setStyleSheet (
     QString (
       "QCheckBox::indicator {"
         "width: %1px;"
         "height: %2px;"
       "}"
-    ).arg (QString::number (checkbox_indicator_size),
-           QString::number (checkbox_indicator_size))
+    ).arg (QString::number (checkboxIndicatorSize),
+           QString::number (checkboxIndicatorSize))
   );
   ui->setupUi (this);
 
@@ -191,13 +191,13 @@ QWidget* MainWindow::getDrawWidget (bool white)
   return white ? ui->whitePiecesWidget : ui->blackPiecesWidget;
 }
 
-static bool makeLayout (QSize size, QRect& box1, QRect& box2, bool aligned_left)
+static bool makeLayout (QSize size, QRect& box1, QRect& box2, bool alignedLeft)
 {
   const double maxWidthCoeff = 0.8;
 
   int height = size.height () / 2;
   int width = qMin (height * 8, (int) (size.width () * maxWidthCoeff));
-  int left = aligned_left ? 0 : size.width () - width;
+  int left = alignedLeft ? 0 : size.width () - width;
 
   box1 = QRect (left, 0,      width, height);
   box2 = QRect (left, height, width, height);
@@ -240,7 +240,7 @@ bool MainWindow::eventFilter (QObject* qObj, QEvent* qEvent)
       return false;
   }
   else
-    return QMainWindow::eventFilter(qObj, qEvent);
+    return QMainWindow::eventFilter (qObj, qEvent);
 }
 
 void MainWindow::clearPosition ()

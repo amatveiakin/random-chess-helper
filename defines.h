@@ -1,9 +1,9 @@
 #ifndef DEFINES_H
 #define DEFINES_H
 
-const double clickable_element_size_in_inch = 0.4;
-extern int physical_dpi;
-extern int clickable_element_size;
-const double relative_checkbox_indicator_size = 0.7;
+const double clickableElementSizeInInch = 0.4;
+extern int physicalDpi;
+extern int clickableElementSize;
+const double relativeCheckboxIndicatorSize = 0.7;
 
 #endif // DEFINES_H

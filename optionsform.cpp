@@ -9,9 +9,9 @@
 #include "defines.h"
 #include "mainwindow.h"
 
-OptionsForm::OptionsForm (QSettings* appSettings_, MainWindow* mainWindow_, QWidget* parent) :
-  QWidget (parent),
-  ui (new Ui::OptionsForm)
+OptionsForm::OptionsForm (QSettings* appSettings_, MainWindow* mainWindow_, QWidget* parent)
+  : QWidget (parent)
+  , ui (new Ui::OptionsForm)
 {
   ui->setupUi (this);
 
@@ -31,7 +31,7 @@ OptionsForm::OptionsForm (QSettings* appSettings_, MainWindow* mainWindow_, QWid
   connect (ui->buttonBox, SIGNAL (accepted ()), SLOT (close ()));
 }
 
-OptionsForm::~OptionsForm()
+OptionsForm::~OptionsForm ()
 {
   delete ui;
 }
@@ -47,7 +47,7 @@ void OptionsForm::applySettings ()
 
 void OptionsForm::updateLayout (QSize size)
 {
-  const int minHeight = qMin (clickable_element_size, size.height () / 6);
+  const int minHeight = qMin (clickableElementSize, size.height () / 6);
 
   QPushButton* okButton = ui->buttonBox->button (QDialogButtonBox::Ok);
   if (okButton)
@@ -62,5 +62,5 @@ void OptionsForm::updateLayout (QSize size)
 void OptionsForm::closeEvent (QCloseEvent* event)
 {
   mainWindow->hideOptions ();
-  event->accept();
+  event->accept ();
 }
