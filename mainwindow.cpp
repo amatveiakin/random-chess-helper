@@ -27,7 +27,8 @@ int clickable_element_size  = -1;  // Uninitialized
 
 
 MainWindow::MainWindow (QWidget *parent)
-  : QMainWindow (parent), ui (new Ui::MainWindow)
+  : QMainWindow (parent)
+  , ui (new Ui::MainWindow)
 {
   srand (QDateTime::currentDateTime().toMSecsSinceEpoch ());
 
@@ -45,9 +46,14 @@ MainWindow::MainWindow (QWidget *parent)
   );
   ui->setupUi (this);
 
+  appSettings = new QSettings (companyName, applicationName);
+  optionsForm = new OptionsForm (appSettings, this);
+
   mainLayout = new QStackedLayout;
   mainLayout->addWidget (ui->formWidget);
+  mainLayout->addWidget (optionsForm);
   ui->centralWidget->setLayout (mainLayout);
+  hideOptions ();
 
   clearPosition ();
 
@@ -69,9 +75,6 @@ MainWindow::MainWindow (QWidget *parent)
   ui->buttonsLayout->setStretch (0, 1);
   ui->buttonsLayout->setStretch (1, 2);
   ui->buttonsLayout->setStretch (2, 1);
-
-  optionsForm = 0;
-  appSettings = new QSettings (companyName, applicationName);
 
   ui->whitePiecesWidget->installEventFilter (this);
   ui->blackPiecesWidget->installEventFilter (this);
@@ -134,7 +137,7 @@ static QRect shrinkToSquare (const QRect& rect)
   return QRect (center.x () - size / 2, center.y () - size / 2, size, size);
 }
 
-// TODO: make images square
+// TODO: make images square (?)
 static void updateImages (QSvgRenderer** renderers, QImage** images, QSize newSize)
 {
   if (!images[0] || images[0]->size () != newSize) {
@@ -305,10 +308,6 @@ void MainWindow::setupNewPlacing ()
 
 void MainWindow::showOptions ()
 {
-  if (!optionsForm) {
-    optionsForm = new OptionsForm (appSettings, this);
-    mainLayout->addWidget (optionsForm);
-  }
   mainLayout->setCurrentWidget (optionsForm);
 }
 

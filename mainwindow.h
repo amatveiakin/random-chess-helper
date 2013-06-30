@@ -67,7 +67,6 @@ private:
   Ui::MainWindow* ui;
   QStackedLayout* mainLayout;
   OptionsForm* optionsForm;
-  bool isInitialised;
 
 public slots:
   void showOptions ();

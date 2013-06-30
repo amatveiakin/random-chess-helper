@@ -23,11 +23,6 @@ OptionsForm::OptionsForm (QSettings* appSettings_, MainWindow* mainWindow_, QWid
   ui->symmetricPlacingCheckBox      ->setChecked (appSettings->value ("symmetricPlacing",       true).toBool ());
   ui->bughouseModeCheckBox          ->setChecked (appSettings->value ("bughouseMode",          false).toBool ());
 
-  ui->oppositeColoredBishopsCheckBox->setFixedHeight (clickable_element_size);
-  ui->kingBetweenRooksCheckBox      ->setFixedHeight (clickable_element_size);
-  ui->symmetricPlacingCheckBox      ->setFixedHeight (clickable_element_size);
-  ui->bughouseModeCheckBox          ->setFixedHeight (clickable_element_size);
-
   connect (ui->oppositeColoredBishopsCheckBox, SIGNAL (toggled (bool)), SLOT (applySettings ()));
   connect (ui->kingBetweenRooksCheckBox,       SIGNAL (toggled (bool)), SLOT (applySettings ()));
   connect (ui->symmetricPlacingCheckBox,       SIGNAL (toggled (bool)), SLOT (applySettings ()));
@@ -52,11 +47,11 @@ void OptionsForm::applySettings ()
 
 void OptionsForm::updateLayout (QSize size)
 {
-  const int minHeight = size.height () / 6;
+  const int minHeight = qMin (clickable_element_size, size.height () / 6);
 
   QPushButton* okButton = ui->buttonBox->button (QDialogButtonBox::Ok);
   if (okButton)
-    okButton->setMinimumSize (width () / 2, minHeight);
+    okButton->setMinimumSize (size.width () / 2, minHeight);
 
   ui->oppositeColoredBishopsCheckBox->setMinimumHeight (minHeight);
   ui->kingBetweenRooksCheckBox      ->setMinimumHeight (minHeight);
