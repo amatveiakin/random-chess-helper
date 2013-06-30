@@ -6,6 +6,7 @@
 #include <QResizeEvent>
 #include <QSettings>
 
+#include "defines.h"
 #include "mainwindow.h"
 
 OptionsForm::OptionsForm (QSettings* appSettings_, MainWindow* mainWindow_, QWidget* parent) :
@@ -21,6 +22,11 @@ OptionsForm::OptionsForm (QSettings* appSettings_, MainWindow* mainWindow_, QWid
   ui->kingBetweenRooksCheckBox      ->setChecked (appSettings->value ("kingBetweenRooks",       true).toBool ());
   ui->symmetricPlacingCheckBox      ->setChecked (appSettings->value ("symmetricPlacing",       true).toBool ());
   ui->bughouseModeCheckBox          ->setChecked (appSettings->value ("bughouseMode",          false).toBool ());
+
+  ui->oppositeColoredBishopsCheckBox->setFixedHeight (clickable_element_size);
+  ui->kingBetweenRooksCheckBox      ->setFixedHeight (clickable_element_size);
+  ui->symmetricPlacingCheckBox      ->setFixedHeight (clickable_element_size);
+  ui->bughouseModeCheckBox          ->setFixedHeight (clickable_element_size);
 
   connect (ui->oppositeColoredBishopsCheckBox, SIGNAL (toggled (bool)), SLOT (applySettings ()));
   connect (ui->kingBetweenRooksCheckBox,       SIGNAL (toggled (bool)), SLOT (applySettings ()));

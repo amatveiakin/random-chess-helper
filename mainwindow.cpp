@@ -12,6 +12,7 @@
 #include <QBoxLayout>
 #include <QtSvg/QSvgRenderer>
 
+#include "defines.h"
 #include "optionsform.h"
 
 
@@ -21,12 +22,27 @@ const QString applicationName = "Random chess helper";
 const QColor whiteBackcolor = 0xd18b47;
 const QColor blackBackcolor = 0xffce9e;
 
+int physical_dpi = -1;  // Uninitialized
+int clickable_element_size  = -1;  // Uninitialized
+
 
 MainWindow::MainWindow (QWidget *parent)
   : QMainWindow (parent), ui (new Ui::MainWindow)
 {
   srand (QDateTime::currentDateTime().toMSecsSinceEpoch ());
 
+  physical_dpi = (physicalDpiX () + physicalDpiY ()) / 2;
+  clickable_element_size  = clickable_element_size_in_inch * physical_dpi;
+  int checkbox_indicator_size = clickable_element_size * relative_checkbox_indicator_size;
+  setStyleSheet (
+    QString (
+      "QCheckBox::indicator {"
+        "width: %1px;"
+        "height: %2px;"
+      "}"
+    ).arg (QString::number (checkbox_indicator_size),
+           QString::number (checkbox_indicator_size))
+  );
   ui->setupUi (this);
 
   mainLayout = new QStackedLayout;

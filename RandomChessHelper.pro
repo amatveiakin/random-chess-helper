@@ -3,7 +3,8 @@ QMAKE_CXXFLAGS += -Wall -Wextra
 SOURCES += main.cpp mainwindow.cpp \
     optionsform.cpp
 HEADERS += mainwindow.h \
-    optionsform.h
+    optionsform.h \
+    defines.h
 FORMS += mainwindow.ui \
     optionsform.ui
 
